@@ -32,15 +32,17 @@ action code
 // Identificadores
 terminal identificador, numero, letras, decimal, caracter;
 // Simbolos
-terminal guionBajo;
+// terminal guionBajo;
 // Estructura de archivo
-terminal llaveA, llaveC, guion, mayorQue, porcentajes;
+terminal llaveA, llaveC, guion, mayorQue, porcentaje;
 terminal puntoComa, dosPuntos;
 // Operaciones
 terminal concatenacion, orBooleana, asterisco, mas, interrogacion;
 // Conjuntos
 terminal conjunto;
 terminal coma, tilde;
+// Expresiones
+terminal operador, cadena;
 // Simbolos especiales
 // terminal admiracion, numeral, dolar, porcentaje, ampersand;
 // Caracteres especiales
@@ -62,8 +64,10 @@ non terminal ESTRUCTURA_EXPRESION;
 non terminal LISTA_EXPRESIONES;
 non terminal TIPO_LISTA_EXPRESIONES;
 non terminal TIPO_OPERACION;
+non terminal OPERADOR;
 non terminal VALOR_EXPRESION;
-non terminal NOTACION;
+non terminal VALOR_ID;
+non terminal VALOR_CHAR;
 // LEXEMAS
 non terminal LEXEMA;
 non terminal ESTRUCTURA_LEXEMA;
@@ -85,7 +89,7 @@ CUERPO      ::=
             llaveA 
             CONJUNTO 
             EXPRESION
-            
+            porcentaje porcentaje porcentaje porcentaje
             LEXEMA
             llaveC
             ;
@@ -127,21 +131,36 @@ ESTRUCTURA_EXPRESION    ::=
 LISTA_EXPRESIONES       ::=
                         LISTA_EXPRESIONES TIPO_OPERACION VALOR_EXPRESION
                         | TIPO_OPERACION VALOR_EXPRESION
-                        ;                        
+                        ;
 
 VALOR_EXPRESION     ::=
-                    llaveA identificador llaveC
-                    | comillasDobles caracter comillasDobles
+                    VALOR_ID
+                    | VALOR_CHAR
+                    ;
+
+VALOR_ID            ::=
+                    VALOR_ID llaveA identificador llaveC
+                    | llaveA identificador llaveC
+                    ;
+
+VALOR_CHAR          ::=
+                    VALOR_CHAR cadena
+                    | cadena
                     ;
 
 TIPO_OPERACION      ::=
+                    TIPO_OPERACION OPERADOR
+                    | OPERADOR
+                    ;
+
+OPERADOR            ::=
                     concatenacion
                     | asterisco
                     | mas
                     | interrogacion
                     | orBooleana
                     ;
-                    
+                  
 // |||||||||||||||||||||||  LEXEMA  |||||||||||||||||||||||
 LEXEMA      ::=
             LEXEMA ESTRUCTURA_LEXEMA
@@ -153,13 +172,6 @@ ESTRUCTURA_LEXEMA   ::=
                     ;
 
 LISTA_LEXEMAS       ::=
-                    LISTA_LEXEMAS comillasDobles VALOR_LEXEMA comillasDobles
-                    | comillasDobles VALOR_LEXEMA comillasDobles
-                    ;
-
-VALOR_LEXEMA        ::=
-                    identificador
-                    | numero
-                    | caracter
-                    | decimal
+                    LISTA_LEXEMAS cadena
+                    | cadena
                     ;

@@ -30,24 +30,29 @@ import java.util.LinkedList;
 // digito      = [0-9]
 // minuscula   = [a-z]
 // mayuscula   = [A-Z]
-numero      = [0-9]+
-letras      = [a-zA-Z]
-decimal     = [0-9]+("."[ | 0-9]+)?
-espacios    = [ " " | \t\r\n\f]
-porcentajes = "%%%%"
+numero                  = [0-9]+
+letras                  = [a-zA-Z]
+decimal                 = [0-9]+("."[ | 0-9]+)?
+espacios                = [ " " | \t\r\n\f]
+// porcentajes             = "%%\\n\\r%%"
 //                                                                                     [ digitos 0-9: 48-57 ]                   [minusculas a-z: 65-90 ]        [mayusculas A-Z: 97-122 ]
 // ASCII cod: 33 |  34  |  35 | 36  | 37  | 38  |  39  |  40 | 41  | 42  |  43 |  44 | 45  | 46  |  47 |  58 | 59  |  60 | 61  |  62 |  63 |  64 |  91 |  92  | 93  | 94  | 95  | 96  | 123 | 124 | 125 |
-caracter  = ["!" | "\"" | "#" | "$" | "%" | "&" | "\'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "\\" | "]" | "^" | "_" | "`" | "{" | "|" | "}"]
+caracter                = ["!" | "\"" | "#" | "$" | "%" | "&" | "\'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "\\" | "]" | "^" | "_" | "`" | "{" | "|" | "}"]
 //Identificadores
-identificador      = [a-zA-Z_][a-zA-Z0-9_]*
-comment     = {TraditionalComment} | {EndOfLineComment} | {DocumentationComment}
-
+identificador           = [a-zA-Z_][a-zA-Z0-9_]*
+comment                 = {TraditionalComment} | {EndOfLineComment} | {DocumentationComment}
+cadena                  = \"(.[^\"]*)\"
 TraditionalComment      = "<!" [^*] ~"!>" | "<!" "*"+ "!>"
 EndOfLineComment        = "//" {InputCharacter}* {LineTerminator}?
 DocumentationComment    = "<!" {CommentContent} "*"+ "!>"
 CommentContent          = ( [^*] | \*+ [^/*] )*
 LineTerminator          = \r|\n|\r\n
 InputCharacter          = [^\r\n]
+// Expresiones
+// operador                = ("." | "|" | "*" | "+" | "?")+
+// operador                = [.|*+?]+
+// valExpresion            = (("{"{identificador}"}")|("\""{caracter}"\""))+
+
 
 //  ------------------------    Estados ------------------------    
 
@@ -57,7 +62,7 @@ InputCharacter          = [^\r\n]
 //  ------------------------    Palabras aceptadas    ------------------------    
 "CONJ"          {  System.out.println("Reconocio palabra reservada: " + yytext() + "."); return new Symbol(sym.conjunto, yycolumn, yyline, yytext());}
 //  ------------------------    Simbolos    ------------------------    
-"_"     		{  System.out.println("Reconocio: " + yytext() + " guionBajo"); return new Symbol(sym.guionBajo, yycolumn, yyline, yytext());}
+// "_"     		{  System.out.println("Reconocio: " + yytext() + " guionBajo"); return new Symbol(sym.guionBajo, yycolumn, yyline, yytext());}
 // Estructura archivo
 "{"     		{  System.out.println("Reconocio: " + yytext() + " llaveA"); return new Symbol(sym.llaveA, yycolumn, yyline, yytext());}
 "}"     		{  System.out.println("Reconocio: " + yytext() + " llaveC"); return new Symbol(sym.llaveC, yycolumn, yyline, yytext());}
@@ -78,7 +83,7 @@ InputCharacter          = [^\r\n]
 // "!"     		{  System.out.println("Reconocio: " + yytext() + " admiracion"); return new Symbol(sym.admiracion, yycolumn, yyline, yytext());}
 // "#"     		{  System.out.println("Reconocio: " + yytext() + " numeral"); return new Symbol(sym.numeral, yycolumn, yyline, yytext());}
 // "$"     		{  System.out.println("Reconocio: " + yytext() + " dolar"); return new Symbol(sym.dolar, yycolumn, yyline, yytext());}
-// "%"     		{  System.out.println("Reconocio: " + yytext() + " porcentaje"); return new Symbol(sym.porcentaje, yycolumn, yyline, yytext());}
+"%"     		{  System.out.println("Reconocio: " + yytext() + " porcentaje"); return new Symbol(sym.porcentaje, yycolumn, yyline, yytext());}
 // "&"     		{  System.out.println("Reconocio: " + yytext() + " ampersand"); return new Symbol(sym.ampersand, yycolumn, yyline, yytext());}
 // Caracteres especiales
 "\""     		{  System.out.println("Reconocio: " + yytext() + " comillasDobles"); return new Symbol(sym.comillasDobles, yycolumn, yyline, yytext());}
@@ -98,7 +103,10 @@ InputCharacter          = [^\r\n]
 {letras}   	  	{ System.out.println("Reconocio: " + yytext() + " letras");  return new Symbol(sym.letras, yycolumn, yyline, yytext());}
 {decimal}   	{ System.out.println("Reconocio: " + yytext() + " decimal");  return new Symbol(sym.decimal, yycolumn, yyline, yytext());}
 {caracter}   	{ System.out.println("Reconocio: " + yytext() + " caracter");  return new Symbol(sym.caracter, yycolumn, yyline, yytext());}
-{porcentajes}  	{ System.out.println("Reconocio: " + yytext() + " porcentajes");  return new Symbol(sym.porcentajes, yycolumn, yyline, yytext());}
+// {porcentajes}  	{ System.out.println("Reconocio: " + yytext() + " porAcentajes");  return new Symbol(sym.porcentajes, yycolumn, yyline, yytext());}
 {identificador} { System.out.println("Reconocio: " + yytext() + " identificador");  return new Symbol(sym.identificador, yycolumn, yyline, yytext());}
+// Expresiones
+// {operador}  	{ System.out.println("Reconocio: " + yytext() + " operador");  return new Symbol(sym.operador, yycolumn, yyline, yytext());}
+{cadena}  { System.out.println("Reconocio: " + yytext() + " cadena");  return new Symbol(sym.cadena, yycolumn, yyline, yytext());}
 //  ------------------------    Errores lexicos ------------------------    
 .	 			            { System.out.println("Error lexico " +  yytext() + ", linea: " + yyline + ", columna: " + yycolumn); }
