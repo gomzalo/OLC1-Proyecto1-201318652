@@ -8,41 +8,32 @@ package com.proyecto1.analizadores;
 /** CUP generated class containing symbol constants. */
 public class sym {
   /* terminals */
-  public static final int caracteres = 9;
-  public static final int mayuscula = 8;
-  public static final int conjunto = 24;
-  public static final int ampersand = 31;
+  public static final int conjunto = 20;
   public static final int decimal = 5;
-  public static final int equivale = 14;
-  public static final int coma = 25;
-  public static final int porcentajes = 13;
+  public static final int coma = 21;
+  public static final int porcentajes = 12;
   public static final int numero = 3;
-  public static final int comillaSimple = 33;
-  public static final int porcentaje = 30;
-  public static final int numeral = 28;
-  public static final int comillasDobles = 32;
+  public static final int comillaSimple = 24;
+  public static final int comillasDobles = 23;
+  public static final int caracter = 6;
   public static final int letras = 4;
-  public static final int saltoLinea = 34;
-  public static final int admiracion = 27;
-  public static final int digito = 6;
-  public static final int llaveC = 12;
-  public static final int dolar = 29;
+  public static final int saltoLinea = 25;
+  public static final int guion = 10;
+  public static final int llaveC = 9;
   public static final int EOF = 0;
-  public static final int llaveA = 11;
-  public static final int parC = 18;
+  public static final int llaveA = 8;
   public static final int error = 1;
-  public static final int parA = 17;
-  public static final int minuscula = 7;
-  public static final int tilde = 26;
-  public static final int asterisco = 21;
-  public static final int interrogacion = 23;
-  public static final int mas = 22;
-  public static final int dosPuntos = 16;
-  public static final int puntoComa = 15;
-  public static final int guionBajo = 10;
-  public static final int orBooleana = 20;
-  public static final int concatenacion = 19;
+  public static final int tilde = 22;
+  public static final int asterisco = 17;
+  public static final int interrogacion = 19;
+  public static final int mas = 18;
+  public static final int dosPuntos = 14;
+  public static final int puntoComa = 13;
+  public static final int guionBajo = 7;
+  public static final int orBooleana = 16;
+  public static final int concatenacion = 15;
   public static final int identificador = 2;
+  public static final int mayorQue = 11;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -50,19 +41,15 @@ public class sym {
   "numero",
   "letras",
   "decimal",
-  "digito",
-  "minuscula",
-  "mayuscula",
-  "caracteres",
+  "caracter",
   "guionBajo",
   "llaveA",
   "llaveC",
+  "guion",
+  "mayorQue",
   "porcentajes",
-  "equivale",
   "puntoComa",
   "dosPuntos",
-  "parA",
-  "parC",
   "concatenacion",
   "orBooleana",
   "asterisco",
@@ -71,11 +58,6 @@ public class sym {
   "conjunto",
   "coma",
   "tilde",
-  "admiracion",
-  "numeral",
-  "dolar",
-  "porcentaje",
-  "ampersand",
   "comillasDobles",
   "comillaSimple",
   "saltoLinea"
