@@ -1,0 +1,107 @@
+//  ::::::::::::::::::::::::    Codigo de usuario   ::::::::::::::::::::::::
+
+//  ------------------------    Importaciones  ------------------------ 
+
+package com.proyecto1.analizadores;
+import java_cup.runtime.*;
+import java.util.LinkedList;
+import com.proyecto1.interfaz.*;
+
+//  ------------------------    Codigo para el parser, variables, metodos   ------------------------ 
+parser code
+{:
+   //-----------------------------------------para errores sintacticos-------------------------------------------------------------------------------------------
+    public void syntax_error(Symbol s)
+    {
+        System.err.println("Error en la Línea " + (s.right+1) +" Columna "+(s.left+1)+ ". Identificador "+s.value + " no reconocido. Se ha recuperado del error." );
+    }
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    {
+        System.err.println("Error en la Línea " + (s.right+1)+ " Columna "+(s.left+1)+". Identificador " +s.value + " no reconocido.");
+    }
+    //-------------------------------------------------------------------------------------------------------------------------------------------
+:}
+//  ------------------------    Codigo para acciones gramaticales   ------------------------ 
+action code
+{:
+:}
+
+//  ::::::::::::::::::::::::    Declaraciones   ::::::::::::::::::::::::
+
+//  ------------------------    Declaracion de terminales   ------------------------ 
+// Identificadores
+terminal identificador, numero, letras, decimal, digito, minuscula, mayuscula, caracteres;
+// Simbolos
+terminal guionBajo;
+// Estructura de archivo
+terminal llaveA, llaveC, porcentajes, equivale;
+terminal puntoComa, dosPuntos, parA, parC;
+// Operaciones
+terminal concatenacion, orBooleana, asterisco, mas, interrogacion;
+// Conjuntos
+terminal conjunto;
+terminal coma, tilde;
+// Simbolos especiales
+terminal admiracion, numeral, dolar, porcentaje, ampersand;
+// Caracteres especiales
+terminal comillasDobles, comillaSimple, saltoLinea;
+//  ------------------------    Declaracion de no terminales   ------------------------
+// INICIO
+non terminal INICIO;
+// CUERPO
+non terminal CUERPO;
+// CONJUNTOS
+non terminal CONJUNTO;
+non terminal ESTRUCTURA_CONJUNTO;
+non terminal LISTA_CONJUNTOS;
+non terminal TIPO_LISTA_CONJUNTOS;
+non terminal TIPO_CARACTER;
+// EXPRESIONES
+non terminal EXPRESION;
+non terminal ESTRUCTURA_EXPRESION;
+non terminal LISTA_EXPRESIONES;
+non terminal TIPO_LISTA_EXPRESIONES;
+non terminal TIPO_OPERACION;
+non terminal VALOR_EXPRESION;
+non terminal NOTACION;
+// LEXEMAS
+non terminal LEXEMA;
+non terminal ESTRUCTURA_LEXEMA;
+non terminal LISTA_LEXEMAS;
+//  ------------------------    Precedencia ------------------------ 
+
+//  ------------------------    Inicio del analizador sintactico  ------------------------ 
+
+start with INICIO;
+
+//  ::::::::::::::::::::::::    Reglas semanticas   ::::::::::::::::::::::::
+// |||||||||||||||||||||||  INICIO  |||||||||||||||||||||||
+INICIO      ::= 
+            CUERPO
+            ;
+// |||||||||||||||||||||||  CUERPO  |||||||||||||||||||||||
+CUERPO      ::=
+            llaveA CONJUNTO llaveA
+            ;
+// |||||||||||||||||||||||  CONJUNTO  |||||||||||||||||||||||
+CONJUNTO    ::=
+            CONJUNTO conjunto dosPuntos identificador equivale LISTA_CONJUNTOS puntoComa
+            | conjunto dosPuntos identificador equivale LISTA_CONJUNTOS puntoComa
+            ;
+
+LISTA_CONJUNTOS     ::=
+                    LISTA_CONJUNTOS TIPO_CARACTER TIPO_LISTA_CONJUNTOS TIPO_CARACTER
+                    | TIPO_CARACTER
+                    ;
+
+TIPO_LISTA_CONJUNTOS    ::=
+                        coma
+                        | tilde
+                        ;
+
+TIPO_CARACTER   ::=
+                minuscula
+                | mayuscula
+                | digito
+                | caracteres
+                ;
