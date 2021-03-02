@@ -94,6 +94,7 @@ public class Pantalla_principal extends javax.swing.JFrame {
             sintactico = new Parser(new Lexico(new StringReader(path)));
             sintactico.parse();
             txtSalida.setText(list_of_names);
+            Parser.raiz.mostrarNodo();
         } catch (Exception e) {
         }
     }//GEN-LAST:event_btnCompilarActionPerformed

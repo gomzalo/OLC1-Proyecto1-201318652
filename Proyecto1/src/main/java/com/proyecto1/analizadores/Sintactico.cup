@@ -6,10 +6,12 @@ package com.proyecto1.analizadores;
 import java_cup.runtime.*;
 import java.util.LinkedList;
 import com.proyecto1.interfaz.*;
+import com.proyecto1.arbol.*;
 
 //  ------------------------    Codigo para el parser, variables, metodos   ------------------------ 
 parser code
 {:
+   public static Nodo raiz;
    //-----------------------------------------para errores sintacticos-------------------------------------------------------------------------------------------
     public void syntax_error(Symbol s)
     {
@@ -30,34 +32,38 @@ action code
 
 //  ------------------------    Declaracion de terminales   ------------------------ 
 // Identificadores
-terminal identificador, numero, letras, decimal, caracter;
+terminal numero, letras, decimal, identificador, cadena;
 // Simbolos
-// terminal guionBajo;
 // Estructura de archivo
-terminal llaveA, llaveC, guion, mayorQue, porcentaje;
-terminal puntoComa, dosPuntos;
+terminal puntoComa, dosPuntos, llaveA, llaveC;
 // Operaciones
-terminal concatenacion, orBooleana, asterisco, mas, interrogacion;
+terminal asterisco, mas, punto, interrogacion, orBooleana;
 // Conjuntos
 terminal conjunto;
-terminal coma, tilde;
-// Expresiones
-terminal operador, cadena;
+terminal coma, tilde, valorIDConjunto;
 // Simbolos especiales
-// terminal admiracion, numeral, dolar, porcentaje, ampersand;
+terminal admiracion, comillasDobles, numeral, dolar, porcentaje;
+terminal ampersand, comillaSimple, parentesisA, parentesisC;
+terminal guion, diagonal, menorQue, igual, mayorQue, arroba;
+terminal corcheteA, diagonalInversa, corcheteC, acentoCircunflejo, guionBajo, acentoGrave;
 // Caracteres especiales
-terminal comillasDobles, comillaSimple, saltoLinea;
+// terminal comillasDoblesEspecial, comillaSimpleEspecial, saltoLineaEspecial;
+terminal caracteresEspeciales;
 //  ------------------------    Declaracion de no terminales   ------------------------
 // INICIO
 non terminal INICIO;
 // CUERPO
 non terminal CUERPO;
+non terminal ESTRUCTURA_CUERPO;
 // CONJUNTOS
+non terminal CARACTERES;
 non terminal CONJUNTO;
 non terminal ESTRUCTURA_CONJUNTO;
 non terminal LISTA_CONJUNTOS;
 non terminal TIPO_LISTA_CONJUNTOS;
 non terminal TIPO_CARACTER;
+non terminal CONJUNTO_COMA;
+non terminal CONJUNTO_TILDE;
 // EXPRESIONES
 non terminal EXPRESION;
 non terminal ESTRUCTURA_EXPRESION;
@@ -68,11 +74,14 @@ non terminal OPERADOR;
 non terminal VALOR_EXPRESION;
 non terminal VALOR_ID;
 non terminal VALOR_CHAR;
+// non terminal CARACTERES_ESPECIALES;
 // LEXEMAS
 non terminal LEXEMA;
 non terminal ESTRUCTURA_LEXEMA;
 non terminal LISTA_LEXEMAS;
 non terminal VALOR_LEXEMA;
+// ERROR
+non terminal ERROR;
 //  ------------------------    Precedencia ------------------------ 
 
 //  ------------------------    Inicio del analizador sintactico  ------------------------ 
@@ -82,41 +91,120 @@ start with INICIO;
 //  ::::::::::::::::::::::::    Reglas semanticas   ::::::::::::::::::::::::
 // |||||||||||||||||||||||  INICIO  |||||||||||||||||||||||
 INICIO      ::= 
-            CUERPO
+            CUERPO:inicio_valor 
+                {:
+                    Nodo nuevo_nodo = new Nodo("INICIO");
+                    nuevo_nodo.Hijos.add((Nodo) inicio_valor);
+                    parser.raiz = nuevo_nodo;
+                :}
             ;
 // |||||||||||||||||||||||  CUERPO  |||||||||||||||||||||||
 CUERPO      ::=
             llaveA 
-            CONJUNTO 
-            EXPRESION
-            porcentaje porcentaje porcentaje porcentaje
-            LEXEMA
+                ESTRUCTURA_CUERPO
             llaveC
+            | ERROR
             ;
+
+ESTRUCTURA_CUERPO   ::=
+                    CONJUNTO:cuerpo_ EXPRESION porcentaje porcentaje porcentaje porcentaje LEXEMA
+                        {:
+                            Nodo nuevo_nodo = new Nodo("CUERPO");
+                            nuevo_nodo.Hijos.add((Nodo) cuerpo_);
+                            RESULT = nuevo_nodo;
+                        :}
+                    | EXPRESION CONJUNTO:cuerpo_ porcentaje porcentaje porcentaje porcentaje LEXEMA
+                        {:
+                            Nodo nuevo_nodo = new Nodo("CUERPO");
+                            nuevo_nodo.Hijos.add((Nodo) cuerpo_);
+                            RESULT = nuevo_nodo;
+                        :}
+                    | EXPRESION porcentaje porcentaje porcentaje porcentaje CONJUNTO:cuerpo_ LEXEMA
+                        {:
+                            Nodo nuevo_nodo = new Nodo("CUERPO");
+                            nuevo_nodo.Hijos.add((Nodo) cuerpo_);
+                            RESULT = nuevo_nodo;
+                        :}
+                    | EXPRESION porcentaje porcentaje porcentaje porcentaje LEXEMA CONJUNTO:cuerpo_
+                        {:
+                            Nodo nuevo_nodo = new Nodo("CUERPO");
+                            nuevo_nodo.Hijos.add((Nodo) cuerpo_);
+                            RESULT = nuevo_nodo;
+                        :}
+                    ;
 // |||||||||||||||||||||||  CONJUNTO  |||||||||||||||||||||||
 CONJUNTO    ::=
-            CONJUNTO ESTRUCTURA_CONJUNTO
-            | ESTRUCTURA_CONJUNTO
+            CONJUNTO:conjunto_ ESTRUCTURA_CONJUNTO:es_conj
+                {:
+                    Nodo nuevo_nodo = new Nodo("CONJUNTO");
+                    nuevo_nodo.Hijos.add((Nodo) conjunto_);
+                    nuevo_nodo.Hijos.add((Nodo) es_conj);
+                    RESULT = nuevo_nodo;
+                :}
+            | ESTRUCTURA_CONJUNTO:es_conj
+                {:
+                    Nodo nuevo_nodo = new Nodo("CONJUNTO");
+                    nuevo_nodo.Hijos.add((Nodo) es_conj);
+                    RESULT = nuevo_nodo;
+                :}
             ;
 
 ESTRUCTURA_CONJUNTO ::=
-                    conjunto dosPuntos identificador guion mayorQue LISTA_CONJUNTOS puntoComa
+                    conjunto dosPuntos identificador:identificador_arbol guion mayorQue LISTA_CONJUNTOS puntoComa
+                        {:
+                            RESULT = new Nodo(String.valueOf(identificador_arbol));
+                        :}
                     ;
 
-LISTA_CONJUNTOS     ::=
-                    LISTA_CONJUNTOS TIPO_LISTA_CONJUNTOS TIPO_CARACTER
-                    | TIPO_CARACTER
-                    ;
-
-TIPO_LISTA_CONJUNTOS    ::=
-                        coma
-                        | tilde
+LISTA_CONJUNTOS         ::=
+                        CONJUNTO_COMA
+                        | TIPO_CARACTER tilde TIPO_CARACTER
                         ;
+
+CONJUNTO_COMA           ::=
+                        CONJUNTO_COMA coma TIPO_CARACTER
+                        | TIPO_CARACTER
+                        ;
+
+CARACTERES          ::=
+                    admiracion
+                    | comillasDobles
+                    | numeral
+                    | dolar
+                    | porcentaje
+                    | ampersand
+                    | comillaSimple
+                    | parentesisA
+                    | parentesisC
+                    | asterisco
+                    | mas
+                    | coma
+                    | guion
+                    | punto
+                    | diagonal
+                    | dosPuntos
+                    | puntoComa
+                    | menorQue
+                    | igual
+                    | mayorQue
+                    | interrogacion
+                    | arroba
+                    | corcheteA
+                    | diagonalInversa
+                    | corcheteC
+                    | acentoCircunflejo
+                    | guionBajo
+                    | acentoGrave
+                    | llaveA
+                    | orBooleana
+                    | llaveC
+                    ;
 
 TIPO_CARACTER   ::=
                 letras
                 | numero
-                | caracter
+                | CARACTERES
+                | caracteresEspeciales
                 ;
 // |||||||||||||||||||||||  EXPRESION  |||||||||||||||||||||||
 EXPRESION       ::=
@@ -128,6 +216,12 @@ ESTRUCTURA_EXPRESION    ::=
                         identificador guion mayorQue LISTA_EXPRESIONES puntoComa
                         ;
 
+// CARACTERES_ESPECIALES   ::=
+//                         comillasDoblesEspecial
+//                         | comillaSimpleEspecial
+//                         | saltoLineaEspecial
+//                         ;
+
 LISTA_EXPRESIONES       ::=
                         LISTA_EXPRESIONES TIPO_OPERACION VALOR_EXPRESION
                         | TIPO_OPERACION VALOR_EXPRESION
@@ -136,11 +230,17 @@ LISTA_EXPRESIONES       ::=
 VALOR_EXPRESION     ::=
                     VALOR_ID
                     | VALOR_CHAR
+                    | caracteresEspeciales VALOR_ID caracteresEspeciales
+                    | caracteresEspeciales VALOR_CHAR caracteresEspeciales
+                    | caracteresEspeciales VALOR_ID
+                    | caracteresEspeciales VALOR_CHAR
+                    | VALOR_ID caracteresEspeciales
+                    | VALOR_CHAR caracteresEspeciales
                     ;
 
 VALOR_ID            ::=
-                    VALOR_ID llaveA identificador llaveC
-                    | llaveA identificador llaveC
+                    VALOR_ID valorIDConjunto
+                    | valorIDConjunto
                     ;
 
 VALOR_CHAR          ::=
@@ -154,8 +254,8 @@ TIPO_OPERACION      ::=
                     ;
 
 OPERADOR            ::=
-                    concatenacion
-                    | asterisco
+                    asterisco
+                    | punto
                     | mas
                     | interrogacion
                     | orBooleana
