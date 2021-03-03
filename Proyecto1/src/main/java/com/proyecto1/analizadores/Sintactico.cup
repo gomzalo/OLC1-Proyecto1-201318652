@@ -6,20 +6,45 @@ package com.proyecto1.analizadores;
 import java_cup.runtime.*;
 import java.util.LinkedList;
 import com.proyecto1.interfaz.*;
-import com.proyecto1.arbol.*;
+import com.proyecto1.estructuras.arbol.*;
+import com.proyecto1.estructuras.listas.*;
 
 //  ------------------------    Codigo para el parser, variables, metodos   ------------------------ 
 parser code
 {:
    public static Nodo raiz;
+   public String resultado = "";
+   public static LinkedList<TError> TablaES = new LinkedList<TError>();
    //-----------------------------------------para errores sintacticos-------------------------------------------------------------------------------------------
+   // Metodo para errores sintacticos
     public void syntax_error(Symbol s)
     {
-        System.err.println("Error en la Línea " + (s.right+1) +" Columna "+(s.left+1)+ ". Identificador "+s.value + " no reconocido. Se ha recuperado del error." );
+        String lexema = s.value.toString();
+        int fila = s.right;
+        int columna = s.left;
+
+        System.err.println("!!!!!!! Error Sintactico Recuperado !!!!!!!");
+        System.err.println("\t\tLexema: " + lexema);
+        System.err.println("\t\tFila: " + fila);
+        System.err.println("\t\tColumna: " + columna);
+
+        TError datos = new TError(lexema, fila, columna, "Error Sintactico", "Caracter no esperado.");
+        TablaES.add(datos);
     }
+    // Metodo llamado, en caso no se puede recuperar del error.
     public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
     {
-        System.err.println("Error en la Línea " + (s.right+1)+ " Columna "+(s.left+1)+". Identificador " +s.value + " no reconocido.");
+        String lexema = s.value.toString();
+        int fila = s.right;
+        int columna = s.left;
+
+        System.err.println("!!!!!!! Error Sintactico, MODO PANICO !!!!!!!");
+        System.err.println("\t\tLexema: " + lexema);
+        System.err.println("\t\tFila: " + fila);
+        System.err.println("\t\tColumna: " + columna);
+
+        TError datos = new TError(lexema, fila, columna, "Error Sintactico", "F. Caracter no esperado.");
+        TablaES.add(datos);
     }
     //-------------------------------------------------------------------------------------------------------------------------------------------
 :}
@@ -83,78 +108,90 @@ non terminal VALOR_LEXEMA;
 // ERROR
 non terminal ERROR;
 //  ------------------------    Precedencia ------------------------ 
-
+precedence right punto, asterisco, mas, interrogacion, orBooleana;
 //  ------------------------    Inicio del analizador sintactico  ------------------------ 
 
 start with INICIO;
 
 //  ::::::::::::::::::::::::    Reglas semanticas   ::::::::::::::::::::::::
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 // |||||||||||||||||||||||  INICIO  |||||||||||||||||||||||
-INICIO      ::= 
-            CUERPO:inicio_valor 
-                {:
-                    Nodo nuevo_nodo = new Nodo("INICIO");
-                    nuevo_nodo.Hijos.add((Nodo) inicio_valor);
-                    parser.raiz = nuevo_nodo;
-                :}
-            ;
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+INICIO                  ::= 
+                        CUERPO:inicio_ 
+                            {:
+                                Nodo nuevo_nodo = new Nodo("INICIO");
+                                nuevo_nodo.Hijos.add((Nodo) inicio_);
+                                parser.raiz = nuevo_nodo;
+                                resultado = (String) inicio_;
+                            :}
+                        ;
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 // |||||||||||||||||||||||  CUERPO  |||||||||||||||||||||||
-CUERPO      ::=
-            llaveA 
-                ESTRUCTURA_CUERPO
-            llaveC
-            | ERROR
-            ;
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+CUERPO                  ::=
+                        llaveA 
+                            ESTRUCTURA_CUERPO:cuerpo_
+                        llaveC
+                            {:
+                                Nodo nuevo_nodo = new Nodo("CUERPO");
+                                nuevo_nodo.Hijos.add((Nodo) cuerpo_);
+                                RESULT = nuevo_nodo;
+                            :}
+                        | ERROR
+                        ;
 
-ESTRUCTURA_CUERPO   ::=
-                    CONJUNTO:cuerpo_ EXPRESION porcentaje porcentaje porcentaje porcentaje LEXEMA
-                        {:
-                            Nodo nuevo_nodo = new Nodo("CUERPO");
-                            nuevo_nodo.Hijos.add((Nodo) cuerpo_);
-                            RESULT = nuevo_nodo;
-                        :}
-                    | EXPRESION CONJUNTO:cuerpo_ porcentaje porcentaje porcentaje porcentaje LEXEMA
-                        {:
-                            Nodo nuevo_nodo = new Nodo("CUERPO");
-                            nuevo_nodo.Hijos.add((Nodo) cuerpo_);
-                            RESULT = nuevo_nodo;
-                        :}
-                    | EXPRESION porcentaje porcentaje porcentaje porcentaje CONJUNTO:cuerpo_ LEXEMA
-                        {:
-                            Nodo nuevo_nodo = new Nodo("CUERPO");
-                            nuevo_nodo.Hijos.add((Nodo) cuerpo_);
-                            RESULT = nuevo_nodo;
-                        :}
-                    | EXPRESION porcentaje porcentaje porcentaje porcentaje LEXEMA CONJUNTO:cuerpo_
-                        {:
-                            Nodo nuevo_nodo = new Nodo("CUERPO");
-                            nuevo_nodo.Hijos.add((Nodo) cuerpo_);
-                            RESULT = nuevo_nodo;
-                        :}
-                    ;
+ESTRUCTURA_CUERPO       ::=
+                        | CONJUNTO:es_cuerpo EXPRESION porcentaje porcentaje porcentaje porcentaje LEXEMA
+                            {:
+                                Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                RESULT = nuevo_nodo;
+                            :}
+                        | EXPRESION CONJUNTO:es_cuerpo porcentaje porcentaje porcentaje porcentaje LEXEMA
+                            {:
+                                Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                RESULT = nuevo_nodo;
+                            :}
+                        | EXPRESION porcentaje porcentaje porcentaje porcentaje CONJUNTO:es_cuerpo LEXEMA
+                            {:
+                                Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                RESULT = nuevo_nodo;
+                            :}
+                        | EXPRESION porcentaje porcentaje porcentaje porcentaje LEXEMA CONJUNTO:es_cuerpo
+                            {:
+                                Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                RESULT = nuevo_nodo;
+                            :}
+                        ;
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 // |||||||||||||||||||||||  CONJUNTO  |||||||||||||||||||||||
-CONJUNTO    ::=
-            CONJUNTO:conjunto_ ESTRUCTURA_CONJUNTO:es_conj
-                {:
-                    Nodo nuevo_nodo = new Nodo("CONJUNTO");
-                    nuevo_nodo.Hijos.add((Nodo) conjunto_);
-                    nuevo_nodo.Hijos.add((Nodo) es_conj);
-                    RESULT = nuevo_nodo;
-                :}
-            | ESTRUCTURA_CONJUNTO:es_conj
-                {:
-                    Nodo nuevo_nodo = new Nodo("CONJUNTO");
-                    nuevo_nodo.Hijos.add((Nodo) es_conj);
-                    RESULT = nuevo_nodo;
-                :}
-            ;
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+CONJUNTO                ::=
+                        CONJUNTO:conjunto_ ESTRUCTURA_CONJUNTO:es_conj
+                            {:
+                                Nodo nuevo_nodo = new Nodo("CONJUNTO");
+                                nuevo_nodo.Hijos.add((Nodo) conjunto_);
+                                nuevo_nodo.Hijos.add((Nodo) es_conj);
+                                RESULT = nuevo_nodo;
+                            :}
+                        | ESTRUCTURA_CONJUNTO:es_conj
+                            {:
+                                Nodo nuevo_nodo = new Nodo("CONJUNTO");
+                                nuevo_nodo.Hijos.add((Nodo) es_conj);
+                                RESULT = nuevo_nodo;
+                            :}
+                        ;
 
-ESTRUCTURA_CONJUNTO ::=
-                    conjunto dosPuntos identificador:identificador_arbol guion mayorQue LISTA_CONJUNTOS puntoComa
-                        {:
-                            RESULT = new Nodo(String.valueOf(identificador_arbol));
-                        :}
-                    ;
+ESTRUCTURA_CONJUNTO     ::=
+                        conjunto dosPuntos identificador:identificador_arbol guion mayorQue LISTA_CONJUNTOS puntoComa
+                            {:
+                                RESULT = new Nodo(String.valueOf(identificador_arbol));
+                            :}
+                        ;
 
 LISTA_CONJUNTOS         ::=
                         CONJUNTO_COMA
@@ -166,51 +203,53 @@ CONJUNTO_COMA           ::=
                         | TIPO_CARACTER
                         ;
 
-CARACTERES          ::=
-                    admiracion
-                    | comillasDobles
-                    | numeral
-                    | dolar
-                    | porcentaje
-                    | ampersand
-                    | comillaSimple
-                    | parentesisA
-                    | parentesisC
-                    | asterisco
-                    | mas
-                    | coma
-                    | guion
-                    | punto
-                    | diagonal
-                    | dosPuntos
-                    | puntoComa
-                    | menorQue
-                    | igual
-                    | mayorQue
-                    | interrogacion
-                    | arroba
-                    | corcheteA
-                    | diagonalInversa
-                    | corcheteC
-                    | acentoCircunflejo
-                    | guionBajo
-                    | acentoGrave
-                    | llaveA
-                    | orBooleana
-                    | llaveC
-                    ;
+CARACTERES              ::=
+                        admiracion
+                        | comillasDobles
+                        | numeral
+                        | dolar
+                        | porcentaje
+                        | ampersand
+                        | comillaSimple
+                        | parentesisA
+                        | parentesisC
+                        | asterisco
+                        | mas
+                        | coma
+                        | guion
+                        | punto
+                        | diagonal
+                        | dosPuntos
+                        | puntoComa
+                        | menorQue
+                        | igual
+                        | mayorQue
+                        | interrogacion
+                        | arroba
+                        | corcheteA
+                        | diagonalInversa
+                        | corcheteC
+                        | acentoCircunflejo
+                        | guionBajo
+                        | acentoGrave
+                        | llaveA
+                        | orBooleana
+                        | llaveC
+                        ;
 
-TIPO_CARACTER   ::=
-                letras
-                | numero
-                | CARACTERES
-                | caracteresEspeciales
-                ;
+TIPO_CARACTER           ::=
+                        letras
+                        | numero
+                        | CARACTERES
+                        | caracteresEspeciales
+                        ;
+// |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 // |||||||||||||||||||||||  EXPRESION  |||||||||||||||||||||||
-EXPRESION       ::=
-                EXPRESION ESTRUCTURA_EXPRESION
-                | ESTRUCTURA_EXPRESION
-                ;
+// |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+EXPRESION               ::=
+                        EXPRESION ESTRUCTURA_EXPRESION
+                        | ESTRUCTURA_EXPRESION
+                        ;
 
 ESTRUCTURA_EXPRESION    ::= 
                         identificador guion mayorQue LISTA_EXPRESIONES puntoComa
@@ -227,51 +266,52 @@ LISTA_EXPRESIONES       ::=
                         | TIPO_OPERACION VALOR_EXPRESION
                         ;
 
-VALOR_EXPRESION     ::=
-                    VALOR_ID
-                    | VALOR_CHAR
-                    | caracteresEspeciales VALOR_ID caracteresEspeciales
-                    | caracteresEspeciales VALOR_CHAR caracteresEspeciales
-                    | caracteresEspeciales VALOR_ID
-                    | caracteresEspeciales VALOR_CHAR
-                    | VALOR_ID caracteresEspeciales
-                    | VALOR_CHAR caracteresEspeciales
-                    ;
+VALOR_EXPRESION         ::=
+                        VALOR_ID
+                        | VALOR_CHAR
+                        | caracteresEspeciales VALOR_ID caracteresEspeciales
+                        | caracteresEspeciales VALOR_CHAR caracteresEspeciales
+                        | caracteresEspeciales VALOR_ID
+                        | caracteresEspeciales VALOR_CHAR
+                        | VALOR_ID caracteresEspeciales
+                        | VALOR_CHAR caracteresEspeciales
+                        ;
 
-VALOR_ID            ::=
-                    VALOR_ID valorIDConjunto
-                    | valorIDConjunto
-                    ;
+VALOR_ID                ::=
+                        VALOR_ID valorIDConjunto
+                        | valorIDConjunto
+                        ;
 
-VALOR_CHAR          ::=
-                    VALOR_CHAR cadena
-                    | cadena
-                    ;
+VALOR_CHAR              ::=
+                        VALOR_CHAR cadena
+                        | cadena
+                        ;
 
-TIPO_OPERACION      ::=
-                    TIPO_OPERACION OPERADOR
-                    | OPERADOR
-                    ;
+TIPO_OPERACION          ::=
+                        TIPO_OPERACION OPERADOR
+                        | OPERADOR
+                        ;
 
-OPERADOR            ::=
-                    asterisco
-                    | punto
-                    | mas
-                    | interrogacion
-                    | orBooleana
-                    ;
-                  
+OPERADOR                ::=
+                        asterisco
+                        | punto
+                        | mas
+                        | interrogacion
+                        | orBooleana
+                        ;
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 // |||||||||||||||||||||||  LEXEMA  |||||||||||||||||||||||
-LEXEMA      ::=
-            LEXEMA ESTRUCTURA_LEXEMA
-            | ESTRUCTURA_LEXEMA
-            ;
+// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+LEXEMA                  ::=
+                        LEXEMA ESTRUCTURA_LEXEMA
+                        | ESTRUCTURA_LEXEMA
+                        ;
 
-ESTRUCTURA_LEXEMA   ::=
-                    identificador dosPuntos LISTA_LEXEMAS puntoComa
-                    ;
+ESTRUCTURA_LEXEMA       ::=
+                        identificador dosPuntos LISTA_LEXEMAS puntoComa
+                        ;
 
-LISTA_LEXEMAS       ::=
-                    LISTA_LEXEMAS cadena
-                    | cadena
-                    ;
+LISTA_LEXEMAS           ::=
+                        LISTA_LEXEMAS cadena
+                        | cadena
+                        ;

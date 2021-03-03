@@ -5,6 +5,8 @@
  */
 package com.proyecto1.interfaz;
 import com.proyecto1.analizadores.*;
+import com.proyecto1.estructuras.listas.TError;
+import com.proyecto1.estructuras.arbol.*;
 import java.io.StringReader;
 
 /**
@@ -86,15 +88,30 @@ public class Pantalla_principal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnCompilarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompilarActionPerformed
-        list_of_names="";
+        list_of_names = "";
         txtSalida.setText("");
+        
+        String cadenaEntrada = txtEntrada.getText();
+        Parser sintactico;
+        Lexico lexico = new Lexico(new StringReader(cadenaEntrada));
+        sintactico = new Parser(lexico);
+        
         try {
-            String path = txtEntrada.getText();
-            Parser sintactico;
-            sintactico = new Parser(new Lexico(new StringReader(path)));
             sintactico.parse();
-            txtSalida.setText(list_of_names);
+            txtSalida.setText(sintactico.resultado);
+            
+            System.out.println("\nNODOS EN AST");
             Parser.raiz.mostrarNodo();
+            
+            System.out.println("\nErroes lexicos:");
+            for (TError erroresLexicos : Lexico.TablaEL) {
+                erroresLexicos.mostrar();
+            }
+            System.out.println("\nErroes sintacticos:");
+            for (TError erroresLexicos : Lexico.TablaEL) {
+                erroresLexicos.mostrar();
+            }
+
         } catch (Exception e) {
         }
     }//GEN-LAST:event_btnCompilarActionPerformed

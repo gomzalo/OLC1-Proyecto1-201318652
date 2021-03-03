@@ -4,7 +4,8 @@
 package com.proyecto1.analizadores;
 import java_cup.runtime.*;
 import java.util.LinkedList;
-import com.proyecto1.arbol.*;
+import com.proyecto1.estructuras.arbol.*;
+import com.proyecto1.estructuras.listas.*;
 
 //  ::::::::::::::::::::::::    Opciones y declaraciones   ::::::::::::::::::::::::
 
@@ -12,7 +13,7 @@ import com.proyecto1.arbol.*;
 
 %{
     // Codigo de usuario en sintaxis java
-    //public static LinkedList<TError> TablaEL = new LinkedList<TError>();
+    public static LinkedList<TError> TablaEL = new LinkedList<TError>();
 %}
 
 //  ------------------------    Directivas  ------------------------    
@@ -178,4 +179,7 @@ espacios                = [ " " | \t\r\n\f]
 // {comillaSimpleEspecial}         {  System.out.println("Reconocio: " + yytext() + " comillaSimpleEspecial"); return new Symbol(sym.comillaSimpleEspecial, yycolumn, yyline, yytext());}
 // {saltoLineaEspecial}     		{  System.out.println("Reconocio: " + yytext() + " saltoLineaEspecial"); return new Symbol(sym.saltoLineaEspecial, yycolumn, yyline, yytext());}
 //  ------------------------    Errores lexicos ------------------------    
-    .	 			            { System.out.println("Error lexico " +  yytext() + ", linea: " + yyline + ", columna: " + yycolumn); }
+    .	 			            {   System.out.println("Error lexico " +  yytext() + ", linea: " + yyline + ", columna: " + yycolumn); 
+                                    TError datos = new TError(yytext(), yyline, yycolumn, "Error lexico", "Simbolo no reconocido.");
+                                    TablaEL.add(datos);
+                                }

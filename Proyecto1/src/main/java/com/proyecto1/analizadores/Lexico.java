@@ -8,7 +8,8 @@
 package com.proyecto1.analizadores;
 import java_cup.runtime.*;
 import java.util.LinkedList;
-import com.proyecto1.arbol.*;
+import com.proyecto1.estructuras.arbol.*;
+import com.proyecto1.estructuras.listas.*;
 
 //  ::::::::::::::::::::::::    Opciones y declaraciones   ::::::::::::::::::::::::
 
@@ -320,7 +321,7 @@ public class Lexico implements java_cup.runtime.Scanner {
 
   /* user code: */
     // Codigo de usuario en sintaxis java
-    //public static LinkedList<TError> TablaEL = new LinkedList<TError>();
+    public static LinkedList<TError> TablaEL = new LinkedList<TError>();
 
 
   /**
@@ -731,7 +732,9 @@ public class Lexico implements java_cup.runtime.Scanner {
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1:
-            { System.out.println("Error lexico " +  yytext() + ", linea: " + yyline + ", columna: " + yycolumn);
+            { System.out.println("Error lexico " +  yytext() + ", linea: " + yyline + ", columna: " + yycolumn); 
+                                    TError datos = new TError(yytext(), yyline, yycolumn, "Error lexico", "Simbolo no reconocido.");
+                                    TablaEL.add(datos);
             }
             // fall through
           case 45: break;
