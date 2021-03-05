@@ -5,8 +5,10 @@
  */
 package com.proyecto1.interfaz;
 import com.proyecto1.analizadores.*;
-import com.proyecto1.estructuras.listas.TError;
+import com.proyecto1.estructuras.Instancias;
+//import com.proyecto1.estructuras.pojos.TError;
 import com.proyecto1.estructuras.arbol.*;
+import com.proyecto1.estructuras.pojos.*;
 import java.io.StringReader;
 
 /**
@@ -100,18 +102,34 @@ public class Pantalla_principal extends javax.swing.JFrame {
             sintactico.parse();
             txtSalida.setText(sintactico.resultado);
             
-            System.out.println("\nNODOS EN AST");
-            Parser.raiz.mostrarNodo();
-            
+//            System.out.println("\nNODOS EN AST");
+//            Parser.raiz.mostrarNodo();
+            // Mostrando errores lexicos
             System.out.println("\nErroes lexicos:");
             for (TError erroresLexicos : Lexico.TablaEL) {
                 erroresLexicos.mostrar();
             }
+            // Mostrando errores sintacticos
             System.out.println("\nErroes sintacticos:");
             for (TError erroresLexicos : Lexico.TablaEL) {
                 erroresLexicos.mostrar();
             }
-
+            
+            // Mostrando listas de conjuntos
+            System.out.println("\nLista de conjuntos:");
+            for (Conjunto conjuntoTemporal : Instancias.listaConjuntos) {
+                conjuntoTemporal.mostrar();
+            }
+            // Mostrando listas de expresiones
+            System.out.println("\nLista de expresiones:");
+            for (Expresion expresionTemporal : Instancias.listaExpresiones) {
+                expresionTemporal.mostrar();
+            }
+            // Mostrando listas de lexemas
+            System.out.println("\nLista de lexemas:");
+            for (Lexema lexemaTemporal : Instancias.listaLexemas) {
+                lexemaTemporal.mostrar();
+            }
         } catch (Exception e) {
         }
     }//GEN-LAST:event_btnCompilarActionPerformed

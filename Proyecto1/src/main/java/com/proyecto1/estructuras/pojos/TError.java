@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.proyecto1.estructuras.listas;
+package com.proyecto1.estructuras.pojos;
 
 /**
  *
- * @author David
+ * @author G
  */
 public class TError {
     

@@ -9,7 +9,6 @@ package com.proyecto1.analizadores;
 public class sym {
   /* terminals */
   public static final int mayorQue = 33;
-  public static final int conjunto = 16;
   public static final int orBooleana = 15;
   public static final int ampersand = 25;
   public static final int dosPuntos = 8;
@@ -28,11 +27,12 @@ public class sym {
   public static final int porcentaje = 24;
   public static final int caracteresEspeciales = 41;
   public static final int EOF = 0;
+  public static final int PR_conjunto = 16;
   public static final int mas = 12;
   public static final int error = 1;
   public static final int guionBajo = 39;
   public static final int punto = 13;
-  public static final int letras = 3;
+  public static final int letras = 4;
   public static final int llaveC = 10;
   public static final int puntoComa = 7;
   public static final int llaveA = 9;
@@ -47,15 +47,15 @@ public class sym {
   public static final int valorIDConjunto = 19;
   public static final int admiracion = 20;
   public static final int interrogacion = 14;
-  public static final int decimal = 4;
+  public static final int decimal = 3;
   public static final int diagonal = 30;
   public static final int cadena = 6;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
   "numero",
-  "letras",
   "decimal",
+  "letras",
   "identificador",
   "cadena",
   "puntoComa",
@@ -67,7 +67,7 @@ public class sym {
   "punto",
   "interrogacion",
   "orBooleana",
-  "conjunto",
+  "PR_conjunto",
   "coma",
   "tilde",
   "valorIDConjunto",

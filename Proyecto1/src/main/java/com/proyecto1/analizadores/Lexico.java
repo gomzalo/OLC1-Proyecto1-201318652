@@ -9,7 +9,7 @@ package com.proyecto1.analizadores;
 import java_cup.runtime.*;
 import java.util.LinkedList;
 import com.proyecto1.estructuras.arbol.*;
-import com.proyecto1.estructuras.listas.*;
+import com.proyecto1.estructuras.pojos.*;
 
 //  ::::::::::::::::::::::::    Opciones y declaraciones   ::::::::::::::::::::::::
 
@@ -949,7 +949,7 @@ public class Lexico implements java_cup.runtime.Scanner {
             // fall through
           case 87: break;
           case 44:
-            { System.out.println("Reconocio palabra reservada: " + yytext() + "."); return new Symbol(sym.conjunto, yycolumn, yyline, yytext());
+            { System.out.println("Reconocio palabra reservada: " + yytext() + "."); return new Symbol(sym.PR_conjunto, yycolumn, yyline, yytext());
             }
             // fall through
           case 88: break;

@@ -7,14 +7,92 @@ import java_cup.runtime.*;
 import java.util.LinkedList;
 import com.proyecto1.interfaz.*;
 import com.proyecto1.estructuras.arbol.*;
-import com.proyecto1.estructuras.listas.*;
+import com.proyecto1.estructuras.pojos.*;
+import com.proyecto1.estructuras.pojos.Conjunto;
+import com.proyecto1.estructuras.Instancias;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Stack;
+
 
 //  ------------------------    Codigo para el parser, variables, metodos   ------------------------ 
 parser code
 {:
    public static Nodo raiz;
-   public String resultado = "";
+   public static int contador = 1;
+   public static String resultado = "";
    public static LinkedList<TError> TablaES = new LinkedList<TError>();
+    // Variables para identificadores de conjuntos
+    // public static StringBuilder valorConjuntoSB =  new StringBuilder();
+//     public static LinkedList<Conjunto> listaConjuntos = new LinkedList<Conjunto>();
+// //    public static LinkedList<Conjunto> listaConjuntos;
+// //    public static LinkedList<String> listaValoresConjuntos = new LinkedList<String>();
+// //    public static Stack<String> identificadoresConjuntos = new Stack<String>();
+// //    public static Conjunto conjunto_temporal;
+//     public static int contador_conjuntos = 0;
+//     // ::::::::::::::::::::::::::::     EXPRESIONES       ::::::::::::::::::::::::::::
+//     public static LinkedList<Expresion> listaExpresiones = new LinkedList<Expresion>();
+// //    public static LinkedList<Expresion> listaExpresiones;
+//     public static int contador_expresiones = 0;
+//     // ::::::::::::::::::::::::::::     LEXEMAS       ::::::::::::::::::::::::::::
+//     public static LinkedList<Lexema> listaLexemas = new LinkedList<Lexema>();
+// //    public static LinkedList<Lexema> listaLexemas;    
+//     public static int contador_lexemas = 0;
+    
+    //-------------------------------------------   Graficar arbol  ---------------------------------------------
+    public static void graficarArbol(Nodo act, String nombre){
+        FileWriter fichero = null;
+        PrintWriter pw = null;
+        try {
+            fichero = new FileWriter("C:\\Users\\G\\Desktop\\" + nombre + ".dot");
+            pw = new PrintWriter(fichero);
+            pw.println("digraph G{");
+            pw.println("rankdir=UD");
+            pw.println("node[shape=box]");
+            pw.println("concentrate=true");
+            pw.println(act.getCodigoInterno());
+            pw.println("}");
+        } catch (Exception e) {
+            System.out.println("error, no se realizo el archivo");
+        } finally {
+            try {
+                if (null != fichero) {
+                    fichero.close();
+                }
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+        //para compilar el archivo dot y obtener la imagen
+        try {
+            //dirección doonde se ecnuentra el compilador de graphviz
+            String dotPath = "C:\\Program Files\\Graphviz\\bin\\dot.exe";
+            //dirección del archivo dot
+            String fileInputPath = "C:\\Users\\erick\\OneDrive\\Escritorio\\" + nombre + ".dot";
+            //dirección donde se creara la magen
+            String fileOutputPath = "C:\\Users\\erick\\OneDrive\\Escritorio\\" +nombre+ ".jpg";
+            //tipo de conversón
+            String tParam = "-Tjpg";
+            String tOParam = "-o";
+
+            String[] cmd = new String[5];
+            cmd[0] = dotPath;
+            cmd[1] = tParam;
+            cmd[2] = fileInputPath;
+            cmd[3] = tOParam;
+            cmd[4] = fileOutputPath;
+
+            Runtime rt = Runtime.getRuntime();
+
+            rt.exec(cmd);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+        }
+    }
+
    //-----------------------------------------para errores sintacticos-------------------------------------------------------------------------------------------
    // Metodo para errores sintacticos
     public void syntax_error(Symbol s)
@@ -51,64 +129,69 @@ parser code
 //  ------------------------    Codigo para acciones gramaticales   ------------------------ 
 action code
 {:
+    
 :}
 
 //  ::::::::::::::::::::::::    Declaraciones   ::::::::::::::::::::::::
 
 //  ------------------------    Declaracion de terminales   ------------------------ 
 // Identificadores
-terminal numero, letras, decimal, identificador, cadena;
+terminal String numero;
+terminal String decimal;
+terminal String letras, identificador, cadena;
 // Simbolos
 // Estructura de archivo
-terminal puntoComa, dosPuntos, llaveA, llaveC;
+terminal String puntoComa, dosPuntos, llaveA, llaveC;
 // Operaciones
-terminal asterisco, mas, punto, interrogacion, orBooleana;
+terminal String asterisco, mas, punto, interrogacion, orBooleana;
 // Conjuntos
-terminal conjunto;
-terminal coma, tilde, valorIDConjunto;
+terminal PR_conjunto;
+terminal String coma, tilde, valorIDConjunto;
 // Simbolos especiales
-terminal admiracion, comillasDobles, numeral, dolar, porcentaje;
-terminal ampersand, comillaSimple, parentesisA, parentesisC;
-terminal guion, diagonal, menorQue, igual, mayorQue, arroba;
-terminal corcheteA, diagonalInversa, corcheteC, acentoCircunflejo, guionBajo, acentoGrave;
+terminal String admiracion, comillasDobles, numeral, dolar, porcentaje;
+terminal String ampersand, comillaSimple, parentesisA, parentesisC;
+terminal String guion, diagonal, menorQue, igual, mayorQue, arroba;
+terminal String corcheteA, diagonalInversa, corcheteC, acentoCircunflejo, guionBajo, acentoGrave;
 // Caracteres especiales
 // terminal comillasDoblesEspecial, comillaSimpleEspecial, saltoLineaEspecial;
-terminal caracteresEspeciales;
+terminal String caracteresEspeciales;
 //  ------------------------    Declaracion de no terminales   ------------------------
 // INICIO
-non terminal INICIO;
+non terminal Object INICIO;
 // CUERPO
-non terminal CUERPO;
-non terminal ESTRUCTURA_CUERPO;
+non terminal Object CUERPO;
+non terminal Object ESTRUCTURA_CUERPO;
 // CONJUNTOS
-non terminal CARACTERES;
-non terminal CONJUNTO;
-non terminal ESTRUCTURA_CONJUNTO;
-non terminal LISTA_CONJUNTOS;
-non terminal TIPO_LISTA_CONJUNTOS;
-non terminal TIPO_CARACTER;
-non terminal CONJUNTO_COMA;
-non terminal CONJUNTO_TILDE;
+non terminal String CARACTERES;
+non terminal Object CONJUNTO;
+non terminal Object ESTRUCTURA_CONJUNTO;
+non terminal String LISTA_CONJUNTOS;
+// non terminal String TIPO_LISTA_CONJUNTOS;
+non terminal String TIPO_CARACTER;
+non terminal String CONJUNTO_COMA;
+// non terminal String CONJUNTO_TILDE;
 // EXPRESIONES
-non terminal EXPRESION;
-non terminal ESTRUCTURA_EXPRESION;
-non terminal LISTA_EXPRESIONES;
-non terminal TIPO_LISTA_EXPRESIONES;
-non terminal TIPO_OPERACION;
-non terminal OPERADOR;
-non terminal VALOR_EXPRESION;
-non terminal VALOR_ID;
-non terminal VALOR_CHAR;
+non terminal Object EXPRESION;
+non terminal Object ESTRUCTURA_EXPRESION;
+non terminal String LISTA_EXPRESIONES;
+// non terminal String TIPO_LISTA_EXPRESIONES;
+non terminal String TIPO_OPERACION;
+non terminal String OPERADOR;
+non terminal String VALOR_EXPRESION;
+non terminal String VALOR_ID;
+non terminal String VALOR_CHAR;
 // non terminal CARACTERES_ESPECIALES;
 // LEXEMAS
 non terminal LEXEMA;
 non terminal ESTRUCTURA_LEXEMA;
 non terminal LISTA_LEXEMAS;
-non terminal VALOR_LEXEMA;
+// non terminal VALOR_LEXEMA;
 // ERROR
 non terminal ERROR;
 //  ------------------------    Precedencia ------------------------ 
-precedence right punto, asterisco, mas, interrogacion, orBooleana;
+precedence right orBooleana;
+precedence right punto;
+precedence right asterisco, mas, interrogacion;
 //  ------------------------    Inicio del analizador sintactico  ------------------------ 
 
 start with INICIO;
@@ -120,10 +203,12 @@ start with INICIO;
 INICIO                  ::= 
                         CUERPO:inicio_ 
                             {:
-                                Nodo nuevo_nodo = new Nodo("INICIO");
-                                nuevo_nodo.Hijos.add((Nodo) inicio_);
-                                parser.raiz = nuevo_nodo;
-                                resultado = (String) inicio_;
+                                // Pantalla_principal.list_of_names += inicio_;
+                                // Nodo nuevo_nodo = new Nodo(null, null, "INICIO",);
+                                // nuevo_nodo.Hijos.add((Nodo) inicio_);
+                                // parser.raiz = (Nodo) inicio_;
+                                // resultado = (String) inicio_;
+                                // graficarArbol(inicio_, "testArbol");
                             :}
                         ;
 // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -131,128 +216,280 @@ INICIO                  ::=
 // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 CUERPO                  ::=
                         llaveA 
-                            ESTRUCTURA_CUERPO:cuerpo_
+                            ESTRUCTURA_CUERPO:estructura_cuerpo_
                         llaveC
                             {:
-                                Nodo nuevo_nodo = new Nodo("CUERPO");
-                                nuevo_nodo.Hijos.add((Nodo) cuerpo_);
-                                RESULT = nuevo_nodo;
+                                // Nodo nuevo_nodo = new Nodo("CUERPO");
+                                // nuevo_nodo.Hijos.add((Nodo) cuerpo_);
+                                // RESULT = nuevo_nodo;
+                                // RESULT = estructura_cuerpo_;
                             :}
                         | ERROR
                         ;
 
 ESTRUCTURA_CUERPO       ::=
-                        | CONJUNTO:es_cuerpo EXPRESION porcentaje porcentaje porcentaje porcentaje LEXEMA
+                        | CONJUNTO:conjunto_ EXPRESION:expresion_ porcentaje porcentaje porcentaje porcentaje LEXEMA
                             {:
-                                Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                RESULT = nuevo_nodo;
+                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                // RESULT = nuevo_nodo;
+                                // RESULT = (Nodo) conjunto_;
+                                // RESULT = expresion_;
                             :}
-                        | EXPRESION CONJUNTO:es_cuerpo porcentaje porcentaje porcentaje porcentaje LEXEMA
+                        | EXPRESION:expresion_ CONJUNTO:conjunto_ porcentaje porcentaje porcentaje porcentaje LEXEMA
                             {:
-                                Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                RESULT = nuevo_nodo;
+                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                // RESULT = nuevo_nodo;
+                                // RESULT = expresion_;
                             :}
-                        | EXPRESION porcentaje porcentaje porcentaje porcentaje CONJUNTO:es_cuerpo LEXEMA
+                        | EXPRESION:expresion_ porcentaje porcentaje porcentaje porcentaje CONJUNTO:conjunto_ LEXEMA
                             {:
-                                Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                RESULT = nuevo_nodo;
+                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                // RESULT = nuevo_nodo;
+                                // RESULT = expresion_;
                             :}
-                        | EXPRESION porcentaje porcentaje porcentaje porcentaje LEXEMA CONJUNTO:es_cuerpo
+                        | EXPRESION:expresion_ porcentaje porcentaje porcentaje porcentaje LEXEMA CONJUNTO:conjunto_
                             {:
-                                Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                RESULT = nuevo_nodo;
+                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                // RESULT = nuevo_nodo;
+                                // RESULT = expresion_;
                             :}
                         ;
 // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 // |||||||||||||||||||||||  CONJUNTO  |||||||||||||||||||||||
 // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 CONJUNTO                ::=
-                        CONJUNTO:conjunto_ ESTRUCTURA_CONJUNTO:es_conj
+                        CONJUNTO ESTRUCTURA_CONJUNTO:es_conj_
                             {:
-                                Nodo nuevo_nodo = new Nodo("CONJUNTO");
-                                nuevo_nodo.Hijos.add((Nodo) conjunto_);
-                                nuevo_nodo.Hijos.add((Nodo) es_conj);
-                                RESULT = nuevo_nodo;
+                                // Nodo nuevo_nodo = new Nodo("CONJUNTO");
+                                // nuevo_nodo.Hijos.add((Nodo) conjunto_);
+                                // nuevo_nodo.Hijos.add((Nodo) es_conj);
+                                // RESULT = nuevo_nodo;
+                                //  RESULT = es_conj_;
                             :}
-                        | ESTRUCTURA_CONJUNTO:es_conj
+                        | ESTRUCTURA_CONJUNTO:es_conj_
                             {:
-                                Nodo nuevo_nodo = new Nodo("CONJUNTO");
-                                nuevo_nodo.Hijos.add((Nodo) es_conj);
-                                RESULT = nuevo_nodo;
+                                // Nodo nuevo_nodo = new Nodo(null, null, "CONJUNTO", parser.contador);
+                                // parser.contador++;
+                                // nuevo_nodo.Hijos.add((Nodo) es_conj);
+                                // RESULT = nuevo_nodo;
+                                // RESULT = es_conj_;
                             :}
                         ;
 
 ESTRUCTURA_CONJUNTO     ::=
-                        conjunto dosPuntos identificador:identificador_arbol guion mayorQue LISTA_CONJUNTOS puntoComa
+                        PR_conjunto dosPuntos identificador:identificador_conjunto guion mayorQue LISTA_CONJUNTOS:lista_conjuntos_ puntoComa
                             {:
-                                RESULT = new Nodo(String.valueOf(identificador_arbol));
+                                // Nodo nuevo_identificador_conjunto = new Nodo(null, null, String.valueOf(identificador_arbol), parser.contador);
+                                // parser.contador++;
+                                // RESULT = nuevo_identificador_conjunto;
+                                
+                                // ********************     Obteniendo conjuntos    ********************
+                                StringBuilder temp_conj = new StringBuilder();
+                                temp_conj.append(lista_conjuntos_);
+                                System.out.println("\nConjunto reconocido: " + temp_conj.toString() + "\n");
+                                Instancias.listaConjuntos.add(new Conjunto(Instancias.contador_conjuntos, identificador_conjunto, temp_conj.toString()));
+                                Instancias.contador_conjuntos++;
+                                // RESULT = lista_conjuntos_;
                             :}
                         ;
 
 LISTA_CONJUNTOS         ::=
-                        CONJUNTO_COMA
-                        | TIPO_CARACTER tilde TIPO_CARACTER
+                        CONJUNTO_COMA:conjunto_coma_
+                            {:
+                                RESULT = conjunto_coma_;
+                            :}
+                        | TIPO_CARACTER:tipo_caracter_izq tilde:tilde_ TIPO_CARACTER:tipo_caracter_der
+                            {:
+                                RESULT = tipo_caracter_izq + tilde_ + tipo_caracter_der;
+                            :}
                         ;
 
 CONJUNTO_COMA           ::=
-                        CONJUNTO_COMA coma TIPO_CARACTER
-                        | TIPO_CARACTER
+                        CONJUNTO_COMA:tipo_caracter_izq coma:coma_ TIPO_CARACTER:tipo_caracter_der
+                            {:
+                                RESULT = tipo_caracter_izq + coma_ + tipo_caracter_der;
+                            :}
+                        | TIPO_CARACTER:tipo_caracter_
+                            {:
+                                RESULT = tipo_caracter_;
+                            :}
                         ;
 
 CARACTERES              ::=
-                        admiracion
-                        | comillasDobles
-                        | numeral
-                        | dolar
-                        | porcentaje
-                        | ampersand
-                        | comillaSimple
-                        | parentesisA
-                        | parentesisC
-                        | asterisco
-                        | mas
-                        | coma
-                        | guion
-                        | punto
-                        | diagonal
-                        | dosPuntos
-                        | puntoComa
-                        | menorQue
-                        | igual
-                        | mayorQue
-                        | interrogacion
-                        | arroba
-                        | corcheteA
-                        | diagonalInversa
-                        | corcheteC
-                        | acentoCircunflejo
-                        | guionBajo
-                        | acentoGrave
-                        | llaveA
-                        | orBooleana
-                        | llaveC
+                        admiracion:admiracion_
+                            {:
+                                RESULT = admiracion_;
+                            :}
+                        | comillasDobles:comillasDobles_
+                            {:
+                                RESULT = comillasDobles_;
+                            :}
+                        | numeral:numeral_
+                            {:
+                                RESULT = numeral_;
+                            :}
+                        | dolar:dolar_
+                            {:
+                                RESULT = dolar_;
+                            :}
+                        | porcentaje:porcentaje_
+                            {:
+                                RESULT = porcentaje_;
+                            :}
+                        | ampersand:ampersand_
+                            {:
+                                RESULT = ampersand_;
+                            :}
+                        | comillaSimple:comillaSimple_
+                            {:
+                                RESULT = comillaSimple_;
+                            :}
+                        | parentesisA:parentesisA_
+                            {:
+                                RESULT = parentesisA_;
+                            :}
+                        | parentesisC:parentesisC_
+                            {:
+                                RESULT = parentesisC_;
+                            :}
+                        | asterisco:asterisco_
+                            {:
+                                RESULT = asterisco_;
+                            :}
+                        | mas:mas_
+                            {:
+                                RESULT = mas_;
+                            :}
+                        | coma:coma_
+                            {:
+                                RESULT = coma_;
+                            :}
+                        | guion:guion_
+                            {:
+                                RESULT = guion_;
+                            :}
+                        | punto:punto_
+                            {:
+                                RESULT = punto_;
+                            :}
+                        | diagonal:diagonal_
+                            {:
+                                RESULT = diagonal_;
+                            :}
+                        | dosPuntos:dosPuntos_
+                            {:
+                                RESULT = dosPuntos_;
+                            :}
+                        | puntoComa:puntoComa_
+                            {:
+                                RESULT = puntoComa_;
+                            :}
+                        | menorQue:menorQue_
+                            {:
+                                RESULT = menorQue_;
+                            :}
+                        | igual:igual_
+                            {:
+                                RESULT = igual_;
+                            :}
+                        | mayorQue:mayorQue_
+                            {:
+                                RESULT = mayorQue_;
+                            :}
+                        | interrogacion:interrogacion_
+                            {:
+                                RESULT = interrogacion_;
+                            :}
+                        | arroba:arroba_
+                            {:
+                                RESULT = arroba_;
+                            :}
+                        | corcheteA:corcheteA_
+                            {:
+                                RESULT = corcheteA_;
+                            :}
+                        | diagonalInversa:diagonalInversa_
+                            {:
+                                RESULT = diagonalInversa_;
+                            :}
+                        | corcheteC:corcheteC_
+                            {:
+                                RESULT = corcheteC_;
+                            :}
+                        | acentoCircunflejo:acentoCircunflejo_
+                            {:
+                                RESULT = acentoCircunflejo_;
+                            :}
+                        | guionBajo:guionBajo_
+                            {:
+                                RESULT = guionBajo_;
+                            :}
+                        | acentoGrave:acentoGrave_
+                            {:
+                                RESULT = acentoGrave_;
+                            :}
+                        | llaveA:llaveA_
+                            {:
+                                RESULT = llaveA_;
+                            :}
+                        | orBooleana:orBooleana_
+                            {:
+                                RESULT = orBooleana_;
+                            :}
+                        | llaveC:llaveC_
+                            {:
+                                RESULT = llaveC_;
+                            :}
                         ;
 
 TIPO_CARACTER           ::=
-                        letras
-                        | numero
-                        | CARACTERES
-                        | caracteresEspeciales
+                        letras:letras_
+                            {:
+                                RESULT = letras_;
+                            :}
+                        | numero:numero_
+                            {:
+                                RESULT = numero_;
+                            :}
+                        | CARACTERES:caracteres_
+                            {:
+                                RESULT = caracteres_;
+                            :}
+                        | caracteresEspeciales:caracteresEspeciales_
+                            {:
+                                RESULT = caracteresEspeciales_;
+                            :}
                         ;
+
 // |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 // |||||||||||||||||||||||  EXPRESION  |||||||||||||||||||||||
 // |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 EXPRESION               ::=
-                        EXPRESION ESTRUCTURA_EXPRESION
-                        | ESTRUCTURA_EXPRESION
+                        EXPRESION ESTRUCTURA_EXPRESION:es_expresion_
+                            {:
+                                RESULT = es_expresion_;
+                            :}
+                        | ESTRUCTURA_EXPRESION:es_expresion_
+                            {:
+                                RESULT = es_expresion_;
+                            :}
                         ;
 
 ESTRUCTURA_EXPRESION    ::= 
-                        identificador guion mayorQue LISTA_EXPRESIONES puntoComa
+                        identificador:identificador_expresion guion mayorQue LISTA_EXPRESIONES:lista_expresiones_ puntoComa
+                            {:
+                                // ********************     Obteniendo expresiones    ********************
+                                StringBuilder temp_exp = new StringBuilder();
+                                temp_exp.append(lista_expresiones_);
+                                System.out.println("\nExpresion reconocida: " + temp_exp.toString() + "\n");
+                                Instancias.listaExpresiones.add(new Expresion(Instancias.contador_expresiones, identificador_expresion, temp_exp.toString()));
+                                Instancias.contador_expresiones++;
+                                RESULT = lista_expresiones_;
+                            :}
                         ;
 
 // CARACTERES_ESPECIALES   ::=
@@ -262,42 +499,110 @@ ESTRUCTURA_EXPRESION    ::=
 //                         ;
 
 LISTA_EXPRESIONES       ::=
-                        LISTA_EXPRESIONES TIPO_OPERACION VALOR_EXPRESION
-                        | TIPO_OPERACION VALOR_EXPRESION
+                        LISTA_EXPRESIONES TIPO_OPERACION:tipo_operacion_ VALOR_EXPRESION:valor_expresion_
+                            {:
+                                RESULT = tipo_operacion_ + valor_expresion_;
+                            :}
+                        | TIPO_OPERACION:tipo_operacion_ VALOR_EXPRESION:valor_expresion_
+                            {:
+                                RESULT = tipo_operacion_ + valor_expresion_;
+                            :}
                         ;
 
 VALOR_EXPRESION         ::=
-                        VALOR_ID
-                        | VALOR_CHAR
-                        | caracteresEspeciales VALOR_ID caracteresEspeciales
-                        | caracteresEspeciales VALOR_CHAR caracteresEspeciales
-                        | caracteresEspeciales VALOR_ID
-                        | caracteresEspeciales VALOR_CHAR
-                        | VALOR_ID caracteresEspeciales
-                        | VALOR_CHAR caracteresEspeciales
+                        VALOR_ID:valor_id_
+                            {:
+                                RESULT = valor_id_;
+                            :}
+                        | VALOR_CHAR:valor_char_
+                            {:
+                                RESULT = valor_char_;
+                            :}
+                        | caracteresEspeciales:esp_char_
+                            {:
+                                RESULT = esp_char_ ;
+                            :}
                         ;
+                        // | caracteresEspeciales:esp_char_izq VALOR_ID:valor_id_ caracteresEspeciales:esp_char_der
+                        //     {:
+                        //         RESULT = esp_char_izq + valor_id_ + esp_char_der;
+                        //     :}
+                        // | caracteresEspeciales:esp_char_izq VALOR_CHAR:valor_char_ caracteresEspeciales:esp_char_der
+                        //     {:
+                        //         RESULT = esp_char_izq + valor_char_ + esp_char_der;
+                        //     :}
+                        // | caracteresEspeciales:esp_char_ VALOR_ID:valor_id_
+                        //     {:
+                        //         RESULT = esp_char_ + valor_id_;
+                        //     :}
+                        // | caracteresEspeciales:esp_char_ VALOR_CHAR:valor_char_
+                        //     {:
+                        //         RESULT = esp_char_ + valor_char_;
+                        //     :}
+                        // | VALOR_ID:valor_id_ caracteresEspeciales:esp_char_
+                        //     {:
+                        //         RESULT = valor_id_ + esp_char_;
+                        //     :}
+                        // | VALOR_CHAR:valor_char_ caracteresEspeciales:esp_char_
+                        //     {:
+                        //         RESULT = valor_char_ + esp_char_ ;
+                        //     :}
+                        // ;
 
 VALOR_ID                ::=
-                        VALOR_ID valorIDConjunto
-                        | valorIDConjunto
+                        VALOR_ID valorIDConjunto:valor_id_conj_
+                            {:
+                                RESULT = valor_id_conj_;
+                            :}
+                        | valorIDConjunto:valor_id_conj_
+                            {:
+                                RESULT = valor_id_conj_;
+                            :}
                         ;
 
 VALOR_CHAR              ::=
-                        VALOR_CHAR cadena
-                        | cadena
+                        VALOR_CHAR cadena:cadena_
+                            {:
+                                RESULT = cadena_;
+                            :}
+                        | cadena:cadena_
+                            {:
+                                RESULT = cadena_;
+                            :}
                         ;
 
 TIPO_OPERACION          ::=
-                        TIPO_OPERACION OPERADOR
-                        | OPERADOR
+                        TIPO_OPERACION OPERADOR:operador_
+                            {:
+                                RESULT = operador_;
+                            :}
+                        | OPERADOR:operador_
+                            {:
+                                RESULT = operador_;
+                            :}
                         ;
 
 OPERADOR                ::=
-                        asterisco
-                        | punto
-                        | mas
-                        | interrogacion
-                        | orBooleana
+                        asterisco:asterico_
+                            {:
+                                RESULT = asterico_;
+                            :}
+                        | punto:punto_
+                            {:
+                                RESULT = punto_;
+                            :}
+                        | mas:mas_
+                            {:
+                                RESULT = mas_;
+                            :}
+                        | interrogacion:interrogacion_
+                            {:
+                                RESULT = interrogacion_;
+                            :}
+                        | orBooleana:orBooleana_
+                            {:
+                                RESULT = orBooleana_;
+                            :}
                         ;
 // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 // |||||||||||||||||||||||  LEXEMA  |||||||||||||||||||||||
@@ -308,10 +613,24 @@ LEXEMA                  ::=
                         ;
 
 ESTRUCTURA_LEXEMA       ::=
-                        identificador dosPuntos LISTA_LEXEMAS puntoComa
+                        identificador:identificador_lexema dosPuntos LISTA_LEXEMAS:lista_lexemas_ puntoComa
+                            {:
+                                // ********************     Obteniendo lexemas    ********************
+                                StringBuilder temp_lex = new StringBuilder();
+                                temp_lex.append(lista_lexemas_);
+                                System.out.println("\nLexema reconocido: " + temp_lex.toString() + "\n");
+                                Instancias.listaLexemas.add(new Lexema(Instancias.contador_lexemas, identificador_lexema, temp_lex.toString()));
+                                Instancias.contador_lexemas++;
+                            :}
                         ;
 
 LISTA_LEXEMAS           ::=
-                        LISTA_LEXEMAS cadena
-                        | cadena
+                        LISTA_LEXEMAS cadena:cadena_
+                            {:
+                                RESULT = cadena_;
+                            :}
+                        | cadena:cadena_
+                            {:
+                                RESULT = cadena_;
+                            :}
                         ;

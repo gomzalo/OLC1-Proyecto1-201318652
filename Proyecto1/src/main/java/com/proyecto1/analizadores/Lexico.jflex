@@ -5,7 +5,7 @@ package com.proyecto1.analizadores;
 import java_cup.runtime.*;
 import java.util.LinkedList;
 import com.proyecto1.estructuras.arbol.*;
-import com.proyecto1.estructuras.listas.*;
+import com.proyecto1.estructuras.pojos.*;
 
 //  ::::::::::::::::::::::::    Opciones y declaraciones   ::::::::::::::::::::::::
 
@@ -69,7 +69,7 @@ espacios                = [ " " | \t\r\n\f]
 
 //  ::::::::::::::::::::::::    Reglas lexicas   ::::::::::::::::::::::::
 //  ------------------------    Palabras aceptadas    ------------------------    
-"CONJ"          {  System.out.println("Reconocio palabra reservada: " + yytext() + "."); return new Symbol(sym.conjunto, yycolumn, yyline, yytext());}
+"CONJ"          {  System.out.println("Reconocio palabra reservada: " + yytext() + "."); return new Symbol(sym.PR_conjunto, yycolumn, yyline, yytext());}
 //  ------------------------    sym    ------------------------    
 // ..........   Estructura archivo      ..........
 // 59
