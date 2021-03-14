@@ -9,6 +9,7 @@ package com.proyecto1.analizadores;
 public class sym {
   /* terminals */
   public static final int mayorQue = 33;
+  public static final int comillaSimpleEspecial = 42;
   public static final int orBooleana = 15;
   public static final int ampersand = 25;
   public static final int dosPuntos = 8;
@@ -20,12 +21,12 @@ public class sym {
   public static final int coma = 17;
   public static final int igual = 32;
   public static final int identificador = 5;
+  public static final int saltoLineaEspecial = 43;
   public static final int guion = 29;
   public static final int numeral = 22;
   public static final int menorQue = 31;
   public static final int numero = 2;
   public static final int porcentaje = 24;
-  public static final int caracteresEspeciales = 41;
   public static final int EOF = 0;
   public static final int PR_conjunto = 16;
   public static final int mas = 12;
@@ -39,6 +40,7 @@ public class sym {
   public static final int acentoGrave = 40;
   public static final int diagonalInversa = 36;
   public static final int arroba = 34;
+  public static final int comillasDoblesEspecial = 41;
   public static final int dolar = 23;
   public static final int parentesisC = 28;
   public static final int parentesisA = 27;
@@ -92,7 +94,9 @@ public class sym {
   "acentoCircunflejo",
   "guionBajo",
   "acentoGrave",
-  "caracteresEspeciales"
+  "comillasDoblesEspecial",
+  "comillaSimpleEspecial",
+  "saltoLineaEspecial"
   };
 }
 

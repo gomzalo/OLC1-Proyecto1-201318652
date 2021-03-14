@@ -19,13 +19,17 @@ public class Nodo {
     public Nodo izq, der;
     public int id;
 
-    public Nodo(String valor, Nodo izq, Nodo der, int id) {
-        this.valor = valor;
+    public Nodo(Nodo izq, Nodo der, String valor, int id) {
         this.izq = izq;
         this.der = der;
+        this.valor = valor;
         this.id = id;
     }
-
+    
+//    public Object getValor(){
+//        
+//    }
+    
     public Nodo(String valor) {
         this.valor = valor;
         this.Hijos = new LinkedList<>();

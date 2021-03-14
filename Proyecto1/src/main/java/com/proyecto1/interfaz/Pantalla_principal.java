@@ -40,6 +40,19 @@ public class Pantalla_principal extends javax.swing.JFrame {
         btnCompilar = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         txtSalida = new javax.swing.JTextArea();
+        labelTXTSalida = new javax.swing.JLabel();
+        labelTXTEntrada1 = new javax.swing.JLabel();
+        btnGenerarAutomata = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTree1 = new javax.swing.JTree();
+        canvas1 = new java.awt.Canvas();
+        jComboBox1 = new javax.swing.JComboBox<>();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        menuArchivo = new javax.swing.JMenu();
+        menuAbrir = new javax.swing.JMenuItem();
+        menuGuardar = new javax.swing.JMenuItem();
+        menuGuardarComo = new javax.swing.JMenuItem();
+        menuGenerarJSON = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -47,7 +60,7 @@ public class Pantalla_principal extends javax.swing.JFrame {
         txtEntrada.setRows(5);
         jScrollPane1.setViewportView(txtEntrada);
 
-        btnCompilar.setText("Compilar");
+        btnCompilar.setText("Analizar entrada");
         btnCompilar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCompilarActionPerformed(evt);
@@ -59,31 +72,105 @@ public class Pantalla_principal extends javax.swing.JFrame {
         txtSalida.setEnabled(false);
         jScrollPane2.setViewportView(txtSalida);
 
+        labelTXTSalida.setText("Salida");
+
+        labelTXTEntrada1.setText("Archivo de entrada");
+
+        btnGenerarAutomata.setText("Analizar entrada");
+        btnGenerarAutomata.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGenerarAutomataActionPerformed(evt);
+            }
+        });
+
+        jScrollPane3.setViewportView(jTree1);
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        menuArchivo.setText("Archivo");
+
+        menuAbrir.setText("Abrir");
+        menuArchivo.add(menuAbrir);
+
+        menuGuardar.setText("Guardar");
+        menuGuardar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuGuardarActionPerformed(evt);
+            }
+        });
+        menuArchivo.add(menuGuardar);
+
+        menuGuardarComo.setText("Guardar como");
+        menuArchivo.add(menuGuardarComo);
+
+        menuGenerarJSON.setText("Generar JSON");
+        menuGenerarJSON.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuGenerarJSONActionPerformed(evt);
+            }
+        });
+        menuArchivo.add(menuGenerarJSON);
+
+        jMenuBar1.add(menuArchivo);
+
+        setJMenuBar(jMenuBar1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(50, 50, 50)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jScrollPane1)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 344, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(135, 135, 135)
+                        .addGap(50, 50, 50)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane1)
+                            .addComponent(labelTXTEntrada1)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
+                            .addComponent(labelTXTSalida)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(87, 87, 87)
+                        .addComponent(btnGenerarAutomata)
+                        .addGap(51, 51, 51)
                         .addComponent(btnCompilar)))
-                .addContainerGap(57, Short.MAX_VALUE))
+                .addGap(64, 64, 64)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(38, 38, 38)
+                        .addComponent(canvas1, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(89, 89, 89)
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(47, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(39, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
-                .addComponent(btnCompilar)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addComponent(labelTXTEntrada1)
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(33, 33, 33))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1)
+                        .addGap(9, 9, 9)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnCompilar)
+                            .addComponent(btnGenerarAutomata))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(labelTXTSalida)
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(33, 33, 33))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(48, 48, 48)
+                                .addComponent(canvas1, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap(47, Short.MAX_VALUE))))
         );
 
         pack();
@@ -92,31 +179,38 @@ public class Pantalla_principal extends javax.swing.JFrame {
     private void btnCompilarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompilarActionPerformed
         list_of_names = "";
         txtSalida.setText("");
+        Instancias.limpiar();
         
         String cadenaEntrada = txtEntrada.getText();
         Parser sintactico;
         Lexico lexico = new Lexico(new StringReader(cadenaEntrada));
         sintactico = new Parser(lexico);
-        
+        Lexico.TablaEL.clear();
+        Parser.TablaES.clear();
         try {
             sintactico.parse();
-            txtSalida.setText(sintactico.resultado);
-            
+            txtSalida.setText(Parser.resultado);
+            txtSalida.updateUI();
 //            System.out.println("\nNODOS EN AST");
 //            Parser.raiz.mostrarNodo();
-            // Mostrando errores lexicos
-            System.out.println("\nErroes lexicos:");
-            for (TError erroresLexicos : Lexico.TablaEL) {
-                erroresLexicos.mostrar();
-            }
             // Mostrando errores sintacticos
             System.out.println("\nErroes sintacticos:");
-            for (TError erroresLexicos : Lexico.TablaEL) {
-                erroresLexicos.mostrar();
+            if(Parser.TablaES.size() > 0){
+                Parser.TablaES.forEach(erroresSintacticos -> {
+                    erroresSintacticos.mostrar();
+                });
+            }
+            // Mostrando errores lexicos
+            System.out.println("\nErroes lexicos:");
+            if(Lexico.TablaEL.size() > 0){
+                Lexico.TablaEL.forEach(erroresLexicos -> {
+                    erroresLexicos.mostrar();
+                });
             }
             
             // Mostrando listas de conjuntos
             System.out.println("\nLista de conjuntos:");
+            
             for (Conjunto conjuntoTemporal : Instancias.listaConjuntos) {
                 conjuntoTemporal.mostrar();
             }
@@ -133,6 +227,18 @@ public class Pantalla_principal extends javax.swing.JFrame {
         } catch (Exception e) {
         }
     }//GEN-LAST:event_btnCompilarActionPerformed
+
+    private void menuGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGuardarActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_menuGuardarActionPerformed
+
+    private void menuGenerarJSONActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGenerarJSONActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_menuGenerarJSONActionPerformed
+
+    private void btnGenerarAutomataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerarAutomataActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnGenerarAutomataActionPerformed
 
     /**
      * @param args the command line arguments
@@ -171,8 +277,21 @@ public class Pantalla_principal extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCompilar;
+    private javax.swing.JButton btnGenerarAutomata;
+    private java.awt.Canvas canvas1;
+    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTree jTree1;
+    private javax.swing.JLabel labelTXTEntrada1;
+    private javax.swing.JLabel labelTXTSalida;
+    private javax.swing.JMenuItem menuAbrir;
+    private javax.swing.JMenu menuArchivo;
+    private javax.swing.JMenuItem menuGenerarJSON;
+    private javax.swing.JMenuItem menuGuardar;
+    private javax.swing.JMenuItem menuGuardarComo;
     private javax.swing.JTextArea txtEntrada;
     private javax.swing.JTextArea txtSalida;
     // End of variables declaration//GEN-END:variables

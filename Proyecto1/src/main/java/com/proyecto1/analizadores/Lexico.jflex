@@ -46,7 +46,7 @@ valorIDConjunto         = "{" {identificador} "}"
 comillasDoblesEspecial  = "\\""\""
 comillaSimpleEspecial   = "\\""\'"
 saltoLineaEspecial      = "\\""n"
-caracteresEspeciales    = ({comillasDoblesEspecial} | {comillaSimpleEspecial} | {saltoLineaEspecial})
+// caracteresEspeciales    = ({comillasDoblesEspecial} | {comillaSimpleEspecial} | {saltoLineaEspecial})?
 // ..........   Comentarios     ..........
 comment                 = {TraditionalComment} | {EndOfLineComment} | {DocumentationComment}
 TraditionalComment      = "<!" [^*] ~"!>" | "<!" "*"+ "!>"
@@ -174,10 +174,10 @@ espacios                = [ " " | \t\r\n\f]
 // Expresiones
 // {equivale}  	                { System.out.println("Reconocio: " + yytext() + " equivale");  return new Symbol(sym.equivale, yycolumn, yyline, yytext());}
 // Caracteres especiales
-{caracteresEspeciales}        {  System.out.println("Reconocio: " + yytext() + " caracteresEspeciales"); return new Symbol(sym.caracteresEspeciales, yycolumn, yyline, yytext());}
-// {comillasDoblesEspecial}        {  System.out.println("Reconocio: " + yytext() + " comillasDoblesEspecial"); return new Symbol(sym.comillasDoblesEspecial, yycolumn, yyline, yytext());}
-// {comillaSimpleEspecial}         {  System.out.println("Reconocio: " + yytext() + " comillaSimpleEspecial"); return new Symbol(sym.comillaSimpleEspecial, yycolumn, yyline, yytext());}
-// {saltoLineaEspecial}     		{  System.out.println("Reconocio: " + yytext() + " saltoLineaEspecial"); return new Symbol(sym.saltoLineaEspecial, yycolumn, yyline, yytext());}
+// {caracteresEspeciales}          {  System.out.println("Reconocio: " + yytext() + " caracteresEspeciales"); return new Symbol(sym.caracteresEspeciales, yycolumn, yyline, yytext());}
+{comillasDoblesEspecial}        {  System.out.println("Reconocio: " + yytext() + " comillasDoblesEspecial"); return new Symbol(sym.comillasDoblesEspecial, yycolumn, yyline, yytext());}
+{comillaSimpleEspecial}         {  System.out.println("Reconocio: " + yytext() + " comillaSimpleEspecial"); return new Symbol(sym.comillaSimpleEspecial, yycolumn, yyline, yytext());}
+{saltoLineaEspecial}     		{  System.out.println("Reconocio: " + yytext() + " saltoLineaEspecial"); return new Symbol(sym.saltoLineaEspecial, yycolumn, yyline, yytext());}
 //  ------------------------    Errores lexicos ------------------------    
     .	 			            {   System.out.println("Error lexico " +  yytext() + ", linea: " + yyline + ", columna: " + yycolumn); 
                                     TError datos = new TError(yytext(), yyline, yycolumn, "Error lexico", "Simbolo no reconocido.");
