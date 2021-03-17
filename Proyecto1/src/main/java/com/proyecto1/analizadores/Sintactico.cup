@@ -1,1009 +1,1345 @@
 //  ::::::::::::::::::::::::    Codigo de usuario   ::::::::::::::::::::::::
 
-//  ------------------------    Importaciones  ------------------------ 
+    //  ------------------------    Importaciones  ------------------------ 
 
-package com.proyecto1.analizadores;
-import java_cup.runtime.*;
-import java.util.LinkedList;
-import com.proyecto1.interfaz.*;
-import com.proyecto1.estructuras.arbol.*;
-import com.proyecto1.estructuras.pojos.*;
-import com.proyecto1.estructuras.Instancias;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Stack;
+        package com.proyecto1.analizadores;
+        import java_cup.runtime.*;
+        import java.util.LinkedList;
+        import com.proyecto1.interfaz.*;
+        import com.proyecto1.estructuras.arbol.*;
+        import com.proyecto1.estructuras.pojos.*;
+        import com.proyecto1.estructuras.abb.*;
+        import com.proyecto1.estructuras.Instancias;
+        import java.io.FileWriter;
+        import java.io.IOException;
+        import java.io.PrintWriter;
+        import java.util.Stack;
 
 
-//  ------------------------    Codigo para el parser, variables, metodos   ------------------------ 
-parser code
-{:
-   public static Nodo raiz;
-   public static int contador = 1;
-   public static String resultado = "";
-   public static LinkedList<TError> TablaES = new LinkedList<TError>();
-    // Variables para identificadores de conjuntos
-    // public static StringBuilder valorConjuntoSB =  new StringBuilder();
-//     public static LinkedList<Conjunto> listaConjuntos = new LinkedList<Conjunto>();
-// //    public static LinkedList<Conjunto> listaConjuntos;
-// //    public static LinkedList<String> listaValoresConjuntos = new LinkedList<String>();
-// //    public static Stack<String> identificadoresConjuntos = new Stack<String>();
-// //    public static Conjunto conjunto_temporal;
-//     public static int contador_conjuntos = 0;
-//     // ::::::::::::::::::::::::::::     EXPRESIONES       ::::::::::::::::::::::::::::
-//     public static LinkedList<Expresion> listaExpresiones = new LinkedList<Expresion>();
-// //    public static LinkedList<Expresion> listaExpresiones;
-//     public static int contador_expresiones = 0;
-//     // ::::::::::::::::::::::::::::     LEXEMAS       ::::::::::::::::::::::::::::
-//     public static LinkedList<Lexema> listaLexemas = new LinkedList<Lexema>();
-// //    public static LinkedList<Lexema> listaLexemas;    
-//     public static int contador_lexemas = 0;
-    
-    //-------------------------------------------   Graficar arbol  ---------------------------------------------
-    public static void graficarArbol(Nodo act, String nombre){
-        FileWriter fichero = null;
-        PrintWriter pw = null;
-        try {
-            fichero = new FileWriter("C:\\Users\\G\\Desktop\\" + nombre + ".dot");
-            pw = new PrintWriter(fichero);
-            pw.println("digraph G{");
-            pw.println("rankdir=UD");
-            pw.println("node[shape=box]");
-            pw.println("concentrate=true");
-            pw.println(act.getCodigoInterno());
-            pw.println("}");
-        } catch (Exception e) {
-            System.out.println("error, no se realizo el archivo");
-        } finally {
-            try {
-                if (null != fichero) {
-                    fichero.close();
+    //  ------------------------    Codigo para el parser, variables, metodos   ------------------------ 
+            parser code
+            {:
+            public static Nodo raiz;
+            public static int contador = 1;
+            public static String resultado = "";
+            public static LinkedList<TError> TablaES = new LinkedList<TError>();
+            public static Stack<ValorExpresiones> pilaValExps = new Stack<ValorExpresiones>();
+            
+            public static int contador_val_expresiones = 0;
+                // Variables para identificadores de conjuntos
+                // public static StringBuilder valorConjuntoSB =  new StringBuilder();
+            //     public static LinkedList<Conjunto> listaConjuntos = new LinkedList<Conjunto>();
+            // //    public static LinkedList<Conjunto> listaConjuntos;
+            // //    public static LinkedList<String> listaValoresConjuntos = new LinkedList<String>();
+            // //    public static Stack<String> identificadoresConjuntos = new Stack<String>();
+            // //    public static Conjunto conjunto_temporal;
+            //     public static int contador_conjuntos = 0;
+            //     // ::::::::::::::::::::::::::::     EXPRESIONES       ::::::::::::::::::::::::::::
+            //     public static LinkedList<Expresion> listaExpresiones = new LinkedList<Expresion>();
+            // //    public static LinkedList<Expresion> listaExpresiones;
+            //     public static int contador_expresiones = 0;
+            //     // ::::::::::::::::::::::::::::     LEXEMAS       ::::::::::::::::::::::::::::
+            //     public static LinkedList<Lexema> listaLexemas = new LinkedList<Lexema>();
+            // //    public static LinkedList<Lexema> listaLexemas;    
+            //     public static int contador_lexemas = 0;
+            //-------------------------------------------   Operaciones  ---------------------------------------------
+            public static boolean esOperadorUnario(char x){
+                switch(x){
+                    case '+':
+                    case '?':
+                    case '*':
+                        return true;
                 }
-            } catch (Exception e2) {
-                e2.printStackTrace();
+                return false;
             }
-        }
-        //para compilar el archivo dot y obtener la imagen
-        try {
-            //dirección doonde se ecnuentra el compilador de graphviz
-            String dotPath = "C:\\Program Files\\Graphviz\\bin\\dot.exe";
-            //dirección del archivo dot
-            String fileInputPath = "C:\\Users\\G\\Desktop\\" + nombre + ".dot";
-            //dirección donde se creara la magen
-            String fileOutputPath = "C:\\Users\\G\\Desktop\\" +nombre+ ".jpg";
-            //tipo de conversón
-            String tParam = "-Tjpg";
-            String tOParam = "-o";
 
-            String[] cmd = new String[5];
-            cmd[0] = dotPath;
-            cmd[1] = tParam;
-            cmd[2] = fileInputPath;
-            cmd[3] = tOParam;
-            cmd[4] = fileOutputPath;
+            public static boolean esOperador(char x){
+                switch(x){
+                    case '+':
+                    case '?':
+                    case '*':
+                    case '|':
+                    case '.':
+                        return true;
+                }
+                return false;
+            }
+            //-------------------------------------------   Graficar arbol  ---------------------------------------------
+            public static void graficarArbol(Nodo act, String nombre){
+                FileWriter fichero = null;
+                PrintWriter pw = null;
+                try {
+                    fichero = new FileWriter("C:\\Users\\G\\Desktop\\" + nombre + ".dot");
+                    pw = new PrintWriter(fichero);
+                    pw.println("digraph G{");
+                    pw.println("rankdir=UD");
+                    pw.println("node[shape=box]");
+                    pw.println("concentrate=true");
+                    pw.println(act.getCodigoInterno());
+                    pw.println("}");
+                } catch (Exception e) {
+                    System.out.println("error, no se realizo el archivo");
+                } finally {
+                    try {
+                        if (null != fichero) {
+                            fichero.close();
+                        }
+                    } catch (Exception e2) {
+                        e2.printStackTrace();
+                    }
+                }
+                //para compilar el archivo dot y obtener la imagen
+                try {
+                    //dirección doonde se ecnuentra el compilador de graphviz
+                    String dotPath = "C:\\Program Files\\Graphviz\\bin\\dot.exe";
+                    //dirección del archivo dot
+                    String fileInputPath = "C:\\Users\\G\\Desktop\\" + nombre + ".dot";
+                    //dirección donde se creara la magen
+                    String fileOutputPath = "C:\\Users\\G\\Desktop\\" +nombre+ ".jpg";
+                    //tipo de conversón
+                    String tParam = "-Tjpg";
+                    String tOParam = "-o";
 
-            Runtime rt = Runtime.getRuntime();
+                    String[] cmd = new String[5];
+                    cmd[0] = dotPath;
+                    cmd[1] = tParam;
+                    cmd[2] = fileInputPath;
+                    cmd[3] = tOParam;
+                    cmd[4] = fileOutputPath;
 
-            rt.exec(cmd);
+                    Runtime rt = Runtime.getRuntime();
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-        }
-    }
+                    rt.exec(cmd);
 
-   //-----------------------------------------para errores sintacticos-------------------------------------------------------------------------------------------
-   // Metodo para errores sintacticos
-    public void syntax_error(Symbol s)
-    {
-        String lexema = s.value.toString();
-        int fila = s.right;
-        int columna = s.left;
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                } finally {
+                }
+            }
 
-        System.err.println("!!!!!!! Error Sintactico Recuperado !!!!!!!");
-        System.err.println("\t\tLexema: " + lexema);
-        System.err.println("\t\tFila: " + fila);
-        System.err.println("\t\tColumna: " + columna);
+        //-----------------------------------------para errores sintacticos-------------------------------------------------------------------------------------------
+        // Metodo para errores sintacticos
+            public void syntax_error(Symbol s)
+            {
+                String lexema = s.value.toString();
+                int fila = s.right;
+                int columna = s.left;
 
-        TError datos = new TError(lexema, fila, columna, "Error Sintactico", "Caracter no esperado.");
-        TablaES.add(datos);
-    }
-    // Metodo llamado, en caso no se puede recuperar del error.
-    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
-    {
-        String lexema = s.value.toString();
-        int fila = s.right;
-        int columna = s.left;
+                System.err.println("!!!!!!! Error Sintactico Recuperado !!!!!!!");
+                System.err.println("\t\tLexema: " + lexema);
+                System.err.println("\t\tFila: " + fila);
+                System.err.println("\t\tColumna: " + columna);
 
-        System.err.println("!!!!!!! Error Sintactico, MODO PANICO !!!!!!!");
-        System.err.println("\t\tLexema: " + lexema);
-        System.err.println("\t\tFila: " + fila);
-        System.err.println("\t\tColumna: " + columna);
+                TError datos = new TError(lexema, fila, columna, "Error Sintactico", "Caracter no esperado.");
+                TablaES.add(datos);
+            }
+            // Metodo llamado, en caso no se puede recuperar del error.
+            public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+            {
+                String lexema = s.value.toString();
+                int fila = s.right;
+                int columna = s.left;
 
-        TError datos = new TError(lexema, fila, columna, "Error Sintactico", "F. Caracter no esperado.");
-        TablaES.add(datos);
-    }
-    //-------------------------------------------------------------------------------------------------------------------------------------------
-:}
-//  ------------------------    Codigo para acciones gramaticales   ------------------------ 
-action code
-{:
-    
-:}
+                System.err.println("!!!!!!! Error Sintactico, MODO PANICO !!!!!!!");
+                System.err.println("\t\tLexema: " + lexema);
+                System.err.println("\t\tFila: " + fila);
+                System.err.println("\t\tColumna: " + columna);
+
+                TError datos = new TError(lexema, fila, columna, "Error Sintactico", "F. Caracter no esperado.");
+                TablaES.add(datos);
+            }
+            //-------------------------------------------------------------------------------------------------------------------------------------------
+        :}
+    //  ------------------------    Codigo para acciones gramaticales   ------------------------ 
+        action code
+        {:
+            
+        :}
 
 //  ::::::::::::::::::::::::    Declaraciones   ::::::::::::::::::::::::
 
-//  ------------------------    Declaracion de terminales   ------------------------ 
-// Identificadores
-terminal String numero;
-terminal String decimal;
-terminal String letras, identificador, cadena;
-// Simbolos
-// Estructura de archivo
-terminal String puntoComa, dosPuntos, llaveA, llaveC;
-// Operaciones
-terminal String asterisco, mas, punto, interrogacion, orBooleana;
-// Conjuntos
-terminal PR_conjunto;
-terminal String coma, tilde, valorIDConjunto;
-// Simbolos especiales
-terminal String admiracion, comillasDobles, numeral, dolar, porcentaje;
-terminal String ampersand, comillaSimple, parentesisA, parentesisC;
-terminal String guion, diagonal, menorQue, igual, mayorQue, arroba;
-terminal String corcheteA, diagonalInversa, corcheteC, acentoCircunflejo, guionBajo, acentoGrave;
-// Caracteres especiales
-terminal comillasDoblesEspecial, comillaSimpleEspecial, saltoLineaEspecial;
-// terminal String CARACTERES_ESPECIALES;
-//  ------------------------    Declaracion de no terminales   ------------------------
-// INICIO
-non terminal Object INICIO;
-// CUERPO
-non terminal Object CUERPO;
-non terminal Object ESTRUCTURA_CUERPO;
-// CONJUNTOS
-non terminal Object CARACTERES;
-non terminal Object CONJUNTO;
-non terminal Object ESTRUCTURA_CONJUNTO;
-non terminal Object LISTA_CONJUNTOS;
-// non terminal String TIPO_LISTA_CONJUNTOS;
-non terminal Object TIPO_CARACTER;
-non terminal Object CONJUNTO_COMA;
-// non terminal String CONJUNTO_TILDE;
-// EXPRESIONES
-non terminal Object EXPRESION;
-non terminal Object ESTRUCTURA_EXPRESION;
-non terminal Object LISTA_EXPRESIONES;
-// non terminal String TIPO_LISTA_EXPRESIONES;
-non terminal Object TIPO_OPERACION;
-non terminal Object OPERADOR;
-non terminal Object VALOR_EXPRESION;
-non terminal Object VALOR_ID;
-non terminal Object VALOR_CHAR;
-non terminal Object CARACTERES_ESPECIALES;
-// LEXEMAS
-non terminal LEXEMA;
-non terminal ESTRUCTURA_LEXEMA;
-non terminal LISTA_LEXEMAS;
-// non terminal VALOR_LEXEMA;
-// ERROR
-non terminal ERROR;
-//  ------------------------    Precedencia ------------------------ 
-precedence right orBooleana;
-precedence right punto;
-precedence right asterisco, mas, interrogacion;
-//  ------------------------    Inicio del analizador sintactico  ------------------------ 
+    //  ------------------------    Declaracion de terminales   ------------------------ 
+    // Identificadores
+    terminal String numero;
+    terminal String decimal;
+    terminal String letras, identificador, cadena;
+    // Simbolos
+    // Estructura de archivo
+    terminal String puntoComa, dosPuntos, llaveA, llaveC;
+    // Operaciones
+    terminal String asterisco, mas, punto, interrogacion, orBooleana;
+    // Conjuntos
+    terminal PR_conjunto;
+    terminal String coma, tilde, valorIDConjunto;
+    // Simbolos especiales
+    terminal String admiracion, comillasDobles, numeral, dolar, porcentaje;
+    terminal String ampersand, comillaSimple, parentesisA, parentesisC;
+    terminal String guion, diagonal, menorQue, igual, mayorQue, arroba;
+    terminal String corcheteA, diagonalInversa, corcheteC, acentoCircunflejo, guionBajo, acentoGrave;
+    // Caracteres especiales
+    terminal comillasDoblesEspecial, comillaSimpleEspecial, saltoLineaEspecial;
+    // terminal String CARACTERES_ESPECIALES;
+    //  ------------------------    Declaracion de no terminales   ------------------------
+    // INICIO
+    non terminal Object INICIO;
+    // CUERPO
+    non terminal Object CUERPO;
+    non terminal Object ESTRUCTURA_CUERPO;
+    // CONJUNTOS
+    non terminal Object CARACTERES;
+    non terminal Object CONJUNTO;
+    non terminal Object ESTRUCTURA_CONJUNTO;
+    non terminal Object LISTA_CONJUNTOS;
+    // non terminal String TIPO_LISTA_CONJUNTOS;
+    non terminal Object TIPO_CARACTER;
+    non terminal Object CONJUNTO_COMA;
+    // non terminal String CONJUNTO_TILDE;
+    // EXPRESIONES
+    non terminal Object EXPRESION;
+    non terminal Object ESTRUCTURA_EXPRESION;
+    non terminal Object LISTA_EXPRESIONES;
+    // non terminal String TIPO_LISTA_EXPRESIONES;
+    non terminal Object TIPO_OPERACION;
+    non terminal Object OPERADOR;
+    non terminal Object VALOR_EXPRESION;
+    non terminal Object VALOR_ID;
+    non terminal Object VALOR_CHAR;
+    non terminal Object CARACTERES_ESPECIALES;
+    // LEXEMAS
+    non terminal LEXEMA;
+    non terminal ESTRUCTURA_LEXEMA;
+    non terminal LISTA_LEXEMAS;
+    // non terminal VALOR_LEXEMA;
+    // ERROR
+    non terminal ERROR;
+    //  ------------------------    Precedencia ------------------------ 
+    precedence right orBooleana;
+    precedence right punto;
+    precedence right asterisco, mas, interrogacion;
+    //  ------------------------    Inicio del analizador sintactico  ------------------------ 
 
-start with INICIO;
+    start with INICIO;
 
 //  ::::::::::::::::::::::::    Reglas semanticas   ::::::::::::::::::::::::
-// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-// |||||||||||||||||||||||  INICIO  |||||||||||||||||||||||
-// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-INICIO                  ::= 
-                        CUERPO:inicio_ 
-                            {:
-                                // Pantalla_principal.list_of_names += inicio_;
-                                // Nodo nuevo_nodo = new Nodo(null, null, "INICIO",);
-                                // nuevo_nodo.Hijos.add((Nodo) inicio_);
-                                parser.raiz = (Nodo) inicio_;
-                                // resultado = (String) inicio_;
-                                // graficarArbol((Nodo) inicio_, "testArbol");
-                            :}
-                        ;
-// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-// |||||||||||||||||||||||  CUERPO  |||||||||||||||||||||||
-// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-CUERPO                  ::=
-                        llaveA 
-                            ESTRUCTURA_CUERPO:estructura_cuerpo_
-                        llaveC
-                            {:
-                                // Nodo nuevo_nodo = new Nodo("CUERPO");
-                                // nuevo_nodo.Hijos.add((Nodo) cuerpo_);
-                                // RESULT = nuevo_nodo;
-                                RESULT = estructura_cuerpo_;
-                            :}
-                        | ERROR CUERPO 
-                        ;
+    // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    // |||||||||||||||||||||||  INICIO  |||||||||||||||||||||||
+    // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+        INICIO                  ::= 
+                                CUERPO:inicio_ 
+                                    {:
+                                        // Pantalla_principal.list_of_names += inicio_;
+                                        // Nodo nuevo_nodo = new Nodo(null, null, "INICIO",);
+                                        // nuevo_nodo.Hijos.add((Nodo) inicio_);
+                                        // parser.raiz = (Nodo) inicio_;
+                                        // resultado = (String) inicio_;
+                                        // graficarArbol((Nodo) inicio_, "testArbol");
+                                    :}
+                                ;
+    // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    // |||||||||||||||||||||||  CUERPO  |||||||||||||||||||||||
+    // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+        CUERPO                  ::=
+                                llaveA 
+                                    ESTRUCTURA_CUERPO:estructura_cuerpo_
+                                llaveC
+                                    {:
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("CUERPO");
+                                            // nuevo_nodo.Hijos.add((Nodo) cuerpo_);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = estructura_cuerpo_;
+                                    :}
+                                | ERROR CUERPO 
+                                ;
 
-ESTRUCTURA_CUERPO       ::=
-                        | CONJUNTO:conjunto_ EXPRESION:expresion_ porcentaje porcentaje porcentaje porcentaje LEXEMA
-                            {:
-                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                // RESULT = nuevo_nodo;
-                                // RESULT = (Nodo) conjunto_;
-                                RESULT = expresion_;
-                            :}
-                        | EXPRESION:expresion_ CONJUNTO:conjunto_ porcentaje porcentaje porcentaje porcentaje LEXEMA
-                            {:
-                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                // RESULT = nuevo_nodo;
-                                RESULT = expresion_;
-                            :}
-                        | EXPRESION:expresion_ porcentaje porcentaje porcentaje porcentaje CONJUNTO:conjunto_ LEXEMA
-                            {:
-                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                // RESULT = nuevo_nodo;
-                                RESULT = expresion_;
-                            :}
-                        | EXPRESION:expresion_ porcentaje porcentaje porcentaje porcentaje LEXEMA CONJUNTO:conjunto_
-                            {:
-                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                // RESULT = nuevo_nodo;
-                                RESULT = expresion_;
-                            :}
-                        ;
-// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-// |||||||||||||||||||||||  CONJUNTO  |||||||||||||||||||||||
-// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-CONJUNTO                ::=
-                        CONJUNTO ESTRUCTURA_CONJUNTO:es_conj_
-                            {:
-                                // Nodo nuevo_nodo = new Nodo("CONJUNTO");
-                                // nuevo_nodo.Hijos.add((Nodo) conjunto_);
-                                // nuevo_nodo.Hijos.add((Nodo) es_conj);
-                                // RESULT = nuevo_nodo;
-                                 RESULT = es_conj_;
-                            :}
-                        | ESTRUCTURA_CONJUNTO:es_conj_
-                            {:
-                                // Nodo nuevo_nodo = new Nodo(null, null, "CONJUNTO", parser.contador);
-                                // parser.contador++;
-                                // nuevo_nodo.Hijos.add((Nodo) es_conj);
-                                // RESULT = nuevo_nodo;
-                                RESULT = es_conj_;
-                            :}
-                        ;
+        ESTRUCTURA_CUERPO       ::=
+                                | CONJUNTO:conjunto_ EXPRESION:expresion_ porcentaje porcentaje porcentaje porcentaje LEXEMA
+                                    {:
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                            // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                            // RESULT = nuevo_nodo;
+                                            // RESULT = (Nodo) conjunto_;
+                                        // ==============================================
+                                        RESULT = expresion_;
+                                    :}
+                                | EXPRESION:expresion_ CONJUNTO:conjunto_ porcentaje porcentaje porcentaje porcentaje LEXEMA
+                                    {:
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                            // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = expresion_;
+                                    :}
+                                | EXPRESION:expresion_ porcentaje porcentaje porcentaje porcentaje CONJUNTO:conjunto_ LEXEMA
+                                    {:
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                            // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = expresion_;
+                                    :}
+                                | EXPRESION:expresion_ porcentaje porcentaje porcentaje porcentaje LEXEMA CONJUNTO:conjunto_
+                                    {:
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                            // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = expresion_;
+                                    :}
+                                ;
+    // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    // |||||||||||||||||||||||  CONJUNTO  |||||||||||||||||||||||
+    // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+        CONJUNTO                ::=
+                                CONJUNTO ESTRUCTURA_CONJUNTO:es_conj_
+                                    {:
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("CONJUNTO");
+                                            // nuevo_nodo.Hijos.add((Nodo) conjunto_);
+                                            // nuevo_nodo.Hijos.add((Nodo) es_conj);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = es_conj_;
+                                    :}
+                                | ESTRUCTURA_CONJUNTO:es_conj_
+                                    {:
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo(null, null, "CONJUNTO", parser.contador);
+                                            // parser.contador++;
+                                            // nuevo_nodo.Hijos.add((Nodo) es_conj);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = es_conj_;
+                                    :}
+                                ;
 
-ESTRUCTURA_CONJUNTO     ::=
-                        PR_conjunto dosPuntos identificador:identificador_conjunto guion mayorQue LISTA_CONJUNTOS:lista_conjuntos_ puntoComa
-                            {:
-                                // Nodo nuevo_identificador_conjunto = new Nodo(null, null, String.valueOf(identificador_arbol), parser.contador);
-                                // parser.contador++;
-                                // RESULT = nuevo_identificador_conjunto;
-                                
-                                // ********************     Obteniendo conjuntos    ********************
-                                StringBuilder temp_conj = new StringBuilder();
-                                Resultado res = (Resultado) lista_conjuntos_;
-                                temp_conj.append(res.getContenido());
-                                System.out.println("\nConjunto reconocido: " + temp_conj.toString() + "\n");
-                                Instancias.listaConjuntos.add(new Conjunto(Instancias.contador_conjuntos, identificador_conjunto, temp_conj.toString()));
-                                Instancias.contador_conjuntos++;
-                                // RESULT = res.getNodoTemporal();
-                            :}
-                        ;
+        ESTRUCTURA_CONJUNTO     ::=
+                                PR_conjunto dosPuntos identificador:identificador_conjunto guion mayorQue LISTA_CONJUNTOS:lista_conjuntos_ puntoComa
+                                    {:
+                                        // ==============================================
+                                            // Nodo nuevo_identificador_conjunto = new Nodo(null, null, String.valueOf(identificador_arbol), parser.contador);
+                                            // parser.contador++;
+                                            // RESULT = nuevo_identificador_conjunto;
+                                        
+                                        // ********************     Obteniendo conjuntos    ********************
+                                        StringBuilder temp_conj = new StringBuilder();
+                                        Resultado res = (Resultado) lista_conjuntos_;
+                                        temp_conj.append(res.getContenido());
+                                        System.out.println("\nConjunto reconocido: " + temp_conj.toString() + "\n");
+                                        Instancias.listaConjuntos.add(new Conjunto(Instancias.contador_conjuntos, identificador_conjunto, temp_conj.toString()));
+                                        Instancias.contador_conjuntos++;
+                                        // RESULT = res.getNodoTemporal();
+                                    :}
+                                ;
 
-LISTA_CONJUNTOS         ::=
-                        CONJUNTO_COMA:conjunto_coma_
-                            {:
-                                String content = (String) conjunto_coma_;
-                                Resultado res = new Resultado(null, content);
-                                RESULT = res;
-                            :}
-                        | TIPO_CARACTER:tipo_caracter_izq tilde:tilde_ TIPO_CARACTER:tipo_caracter_der
-                            {:
-                                String content = tipo_caracter_izq + tilde_ + tipo_caracter_der;
-                                Resultado res = new Resultado(null, content);
-                                RESULT = res;
-                            :}
-                        ;
+        LISTA_CONJUNTOS         ::=
+                                CONJUNTO_COMA:conjunto_coma_
+                                    {:
+                                        String content = (String) conjunto_coma_;
+                                        Resultado res = new Resultado(null, content);
+                                        RESULT = res;
+                                    :}
+                                | TIPO_CARACTER:tipo_caracter_izq tilde:tilde_ TIPO_CARACTER:tipo_caracter_der
+                                    {:
+                                        String content = tipo_caracter_izq + tilde_ + tipo_caracter_der;
+                                        Resultado res = new Resultado(null, content);
+                                        RESULT = res;
+                                    :}
+                                ;
 
-CONJUNTO_COMA           ::=
-                        CONJUNTO_COMA:tipo_caracter_izq coma:coma_ TIPO_CARACTER:tipo_caracter_der
-                            {:
-                                RESULT = tipo_caracter_izq + coma_ + tipo_caracter_der;
-                            :}
-                        | TIPO_CARACTER:tipo_caracter_
-                            {:
-                                RESULT = tipo_caracter_;
-                            :}
-                        ;
+        CONJUNTO_COMA           ::=
+                                CONJUNTO_COMA:tipo_caracter_izq coma:coma_ TIPO_CARACTER:tipo_caracter_der
+                                    {:
+                                        RESULT = tipo_caracter_izq + coma_ + tipo_caracter_der;
+                                    :}
+                                | TIPO_CARACTER:tipo_caracter_
+                                    {:
+                                        RESULT = tipo_caracter_;
+                                    :}
+                                ;
 
-CARACTERES              ::=
-                        admiracion:admiracion_
-                            {:
-                                RESULT = admiracion_;
-                            :}
-                        | comillasDobles:comillasDobles_
-                            {:
-                                RESULT = comillasDobles_;
-                            :}
-                        | numeral:numeral_
-                            {:
-                                RESULT = numeral_;
-                            :}
-                        | dolar:dolar_
-                            {:
-                                RESULT = dolar_;
-                            :}
-                        | porcentaje:porcentaje_
-                            {:
-                                RESULT = porcentaje_;
-                            :}
-                        | ampersand:ampersand_
-                            {:
-                                RESULT = ampersand_;
-                            :}
-                        | comillaSimple:comillaSimple_
-                            {:
-                                RESULT = comillaSimple_;
-                            :}
-                        | parentesisA:parentesisA_
-                            {:
-                                RESULT = parentesisA_;
-                            :}
-                        | parentesisC:parentesisC_
-                            {:
-                                RESULT = parentesisC_;
-                            :}
-                        | asterisco:asterisco_
-                            {:
-                                RESULT = asterisco_;
-                            :}
-                        | mas:mas_
-                            {:
-                                RESULT = mas_;
-                            :}
-                        | coma:coma_
-                            {:
-                                RESULT = coma_;
-                            :}
-                        | guion:guion_
-                            {:
-                                RESULT = guion_;
-                            :}
-                        | punto:punto_
-                            {:
-                                RESULT = punto_;
-                            :}
-                        | diagonal:diagonal_
-                            {:
-                                RESULT = diagonal_;
-                            :}
-                        | dosPuntos:dosPuntos_
-                            {:
-                                RESULT = dosPuntos_;
-                            :}
-                        | puntoComa:puntoComa_
-                            {:
-                                RESULT = puntoComa_;
-                            :}
-                        | menorQue:menorQue_
-                            {:
-                                RESULT = menorQue_;
-                            :}
-                        | igual:igual_
-                            {:
-                                RESULT = igual_;
-                            :}
-                        | mayorQue:mayorQue_
-                            {:
-                                RESULT = mayorQue_;
-                            :}
-                        | interrogacion:interrogacion_
-                            {:
-                                RESULT = interrogacion_;
-                            :}
-                        | arroba:arroba_
-                            {:
-                                RESULT = arroba_;
-                            :}
-                        | corcheteA:corcheteA_
-                            {:
-                                RESULT = corcheteA_;
-                            :}
-                        | diagonalInversa:diagonalInversa_
-                            {:
-                                RESULT = diagonalInversa_;
-                            :}
-                        | corcheteC:corcheteC_
-                            {:
-                                RESULT = corcheteC_;
-                            :}
-                        | acentoCircunflejo:acentoCircunflejo_
-                            {:
-                                RESULT = acentoCircunflejo_;
-                            :}
-                        | guionBajo:guionBajo_
-                            {:
-                                RESULT = guionBajo_;
-                            :}
-                        | acentoGrave:acentoGrave_
-                            {:
-                                RESULT = acentoGrave_;
-                            :}
-                        | llaveA:llaveA_
-                            {:
-                                RESULT = llaveA_;
-                            :}
-                        | orBooleana:orBooleana_
-                            {:
-                                RESULT = orBooleana_;
-                            :}
-                        | llaveC:llaveC_
-                            {:
-                                RESULT = llaveC_;
-                            :}
-                        ;
+        CARACTERES              ::=
+                                admiracion:admiracion_
+                                    {:
+                                        RESULT = admiracion_;
+                                    :}
+                                | comillasDobles:comillasDobles_
+                                    {:
+                                        RESULT = comillasDobles_;
+                                    :}
+                                | numeral:numeral_
+                                    {:
+                                        RESULT = numeral_;
+                                    :}
+                                | dolar:dolar_
+                                    {:
+                                        RESULT = dolar_;
+                                    :}
+                                | porcentaje:porcentaje_
+                                    {:
+                                        RESULT = porcentaje_;
+                                    :}
+                                | ampersand:ampersand_
+                                    {:
+                                        RESULT = ampersand_;
+                                    :}
+                                | comillaSimple:comillaSimple_
+                                    {:
+                                        RESULT = comillaSimple_;
+                                    :}
+                                | parentesisA:parentesisA_
+                                    {:
+                                        RESULT = parentesisA_;
+                                    :}
+                                | parentesisC:parentesisC_
+                                    {:
+                                        RESULT = parentesisC_;
+                                    :}
+                                | asterisco:asterisco_
+                                    {:
+                                        RESULT = asterisco_;
+                                    :}
+                                | mas:mas_
+                                    {:
+                                        RESULT = mas_;
+                                    :}
+                                | coma:coma_
+                                    {:
+                                        RESULT = coma_;
+                                    :}
+                                | guion:guion_
+                                    {:
+                                        RESULT = guion_;
+                                    :}
+                                | punto:punto_
+                                    {:
+                                        RESULT = punto_;
+                                    :}
+                                | diagonal:diagonal_
+                                    {:
+                                        RESULT = diagonal_;
+                                    :}
+                                | dosPuntos:dosPuntos_
+                                    {:
+                                        RESULT = dosPuntos_;
+                                    :}
+                                | puntoComa:puntoComa_
+                                    {:
+                                        RESULT = puntoComa_;
+                                    :}
+                                | menorQue:menorQue_
+                                    {:
+                                        RESULT = menorQue_;
+                                    :}
+                                | igual:igual_
+                                    {:
+                                        RESULT = igual_;
+                                    :}
+                                | mayorQue:mayorQue_
+                                    {:
+                                        RESULT = mayorQue_;
+                                    :}
+                                | interrogacion:interrogacion_
+                                    {:
+                                        RESULT = interrogacion_;
+                                    :}
+                                | arroba:arroba_
+                                    {:
+                                        RESULT = arroba_;
+                                    :}
+                                | corcheteA:corcheteA_
+                                    {:
+                                        RESULT = corcheteA_;
+                                    :}
+                                | diagonalInversa:diagonalInversa_
+                                    {:
+                                        RESULT = diagonalInversa_;
+                                    :}
+                                | corcheteC:corcheteC_
+                                    {:
+                                        RESULT = corcheteC_;
+                                    :}
+                                | acentoCircunflejo:acentoCircunflejo_
+                                    {:
+                                        RESULT = acentoCircunflejo_;
+                                    :}
+                                | guionBajo:guionBajo_
+                                    {:
+                                        RESULT = guionBajo_;
+                                    :}
+                                | acentoGrave:acentoGrave_
+                                    {:
+                                        RESULT = acentoGrave_;
+                                    :}
+                                | llaveA:llaveA_
+                                    {:
+                                        RESULT = llaveA_;
+                                    :}
+                                | orBooleana:orBooleana_
+                                    {:
+                                        RESULT = orBooleana_;
+                                    :}
+                                | llaveC:llaveC_
+                                    {:
+                                        RESULT = llaveC_;
+                                    :}
+                                ;
 
-CARACTERES_ESPECIALES   ::=
-                        comillasDoblesEspecial:comillasDoblesEspecial_
-                            {:
-                                RESULT = comillasDoblesEspecial_;
-                            :}
-                        | comillaSimpleEspecial:comillaSimpleEspecial_
-                            {:
-                                RESULT = comillaSimpleEspecial_;
-                            :}
-                        | saltoLineaEspecial:saltoLineaEspecial_
-                            {:
-                                RESULT = saltoLineaEspecial_;
-                            :}
-                        ;
+        CARACTERES_ESPECIALES   ::=
+                                comillasDoblesEspecial:comillasDoblesEspecial_
+                                    {:
+                                        RESULT = comillasDoblesEspecial_;
+                                    :}
+                                | comillaSimpleEspecial:comillaSimpleEspecial_
+                                    {:
+                                        RESULT = comillaSimpleEspecial_;
+                                    :}
+                                | saltoLineaEspecial:saltoLineaEspecial_
+                                    {:
+                                        RESULT = saltoLineaEspecial_;
+                                    :}
+                                ;
 
-TIPO_CARACTER           ::=
-                        letras:letras_
-                            {:
-                                RESULT = letras_;
-                            :}
-                        | numero:numero_
-                            {:
-                                RESULT = numero_;
-                            :}
-                        | CARACTERES:caracteres_
-                            {:
-                                RESULT = caracteres_;
-                            :}
-                        | CARACTERES_ESPECIALES:caracteresEspeciales_
-                            {:
-                                RESULT = caracteresEspeciales_;
-                            :}
-                        ;
-
-// |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-// |||||||||||||||||||||||  EXPRESION  |||||||||||||||||||||||
-// |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-EXPRESION               ::=
-                        EXPRESION:exp_ ESTRUCTURA_EXPRESION:es_expresion_
-                            {:
-                                Nodo nuevasExpresiones = new Nodo((Nodo) exp_, (Nodo) es_expresion_, "LIST_EXP", parser.contador);
-                                parser.contador++;
-                                RESULT = nuevasExpresiones;
-                                // RESULT = (String) exp_ + (String) es_expresion_;
-                            :}
-                        | ESTRUCTURA_EXPRESION:es_expresion_
-                            {:
-                                RESULT = (Nodo) es_expresion_;
-                            :}
-                        ;
-
-ESTRUCTURA_EXPRESION    ::= 
-                        identificador:identificador_expresion guion mayorQue LISTA_EXPRESIONES:lista_expresiones_ puntoComa
-                            {:
-                                // ********************     Obteniendo expresiones    ********************
-                                StringBuilder temp_exp = new StringBuilder();
-                                Resultado res = (Resultado) lista_expresiones_;
-                                String content = res.getContenido();
-                                // String content = (String) lista_expresiones_;
-                                System.out.println("[GRAM] REC LIST_EXP: " + content);
-                                // temp_exp.append((String) lista_expresiones_);
-                                temp_exp.append((String) content);
-                                System.out.println("\nExpresion reconocida: " + temp_exp.toString() + "\n");
-                                Instancias.listaExpresiones.add(new Expresion(Instancias.contador_expresiones, identificador_expresion, temp_exp.toString()));
-                                Instancias.contador_expresiones++;
-                                Nodo nuevaListaExpresiones = res.getNodoTemporal();
-                                RESULT = nuevaListaExpresiones;
-                                // RESULT = lista_expresiones_;
-                            :}
-                        ;
-
-// CARACTERES_ESPECIALES   ::=
-//                         comillasDoblesEspecial
-//                         | comillaSimpleEspecial
-//                         | saltoLineaEspecial
-//                         ;
-
-LISTA_EXPRESIONES       ::=
-                        LISTA_EXPRESIONES:lista_exp_ TIPO_OPERACION:tipo_operacion_ VALOR_EXPRESION:valor_expresion_der
-                            {:
-                                // Recuperando valores
-                                Resultado res_lista_exp_ = (Resultado) lista_exp_;
-                                Resultado res_tipo_op = (Resultado) tipo_operacion_;
-                                Resultado res_valor_exp_der = (Resultado) valor_expresion_der;
-                                String content_tipo_op = res_tipo_op.getContenido();
-                                String content_valor_lista_exp_ = res_lista_exp_.getContenido();
-                                String content_valor_exp_der = res_valor_exp_der.getContenido();
-                                String content = content_valor_lista_exp_ + content_tipo_op + content_valor_exp_der;
-                                // Decidiendo
-                                Nodo nuevoExpresion = new Nodo(res_lista_exp_.getNodoTemporal(), res_tipo_op.getNodoTemporal(), "LIST_TOP", parser.contador);
-                                parser.contador++;
-                                Nodo nuevaOperacion = new Nodo(nuevoExpresion, res_valor_exp_der.getNodoTemporal(), "LIST_TOP_VALEXP", parser.contador);
-                                parser.contador++;
-                                // Resultado res_lista_exp_ = (Resultado) lista_exp_;
-                                // System.out.println("contttt: \t\t" + res_lista_exp_.getContenido());
-                                // String content = res_lista_exp_.getContenido() + (String) tipo_operacion_ + (String) valor_expresion_der;
-                                // String content = (String) lista_exp_ + (String) tipo_operacion_ + (String) valor_expresion_der;
-                                Resultado res = new Resultado(nuevaOperacion, content);
-                                // String content = res.getContenido();
-                                System.out.println("[GRAM] REC LIST_TOP_VALEXP: " + content);
-                                RESULT = res;
-                                // String content = (String) lista_exp_ + (String) tipo_operacion_ + (String) valor_expresion_der;
-                                // RESULT = content;
-                            :}
-                        | TIPO_OPERACION:tipo_operacion_ VALOR_EXPRESION:valor_expresion_der
-                            {:
-                                Resultado res_tipo_op = (Resultado) tipo_operacion_;
-                                Resultado res_valor_exp_der = (Resultado) valor_expresion_der;
-                                String content_tipo_op = res_tipo_op.getContenido();
-                                String content_valor_exp_der = res_valor_exp_der.getContenido();
-                                String content = content_tipo_op + content_valor_exp_der;
-                                // Decidiendo
-                                Nodo nuevoExpresion = new Nodo(res_tipo_op.getNodoTemporal(), res_valor_exp_der.getNodoTemporal(), "TOP_VALEXP", parser.contador);
-                                parser.contador++; 
-                                Resultado res = new Resultado(nuevoExpresion, content);
-                                System.out.println("[GRAM] REC TOP_VALEXP: " + content);
-                                RESULT = res;
-                                // String content = (String) tipo_operacion_ + (String) valor_expresion_der;
-                                // RESULT = content;
-                            :}
-                        ;
-
-VALOR_EXPRESION         ::=
-
-                            VALOR_ID:valor_id_ VALOR_CHAR:valor_char_ CARACTERES_ESPECIALES:esp_char_
+        TIPO_CARACTER           ::=
+                            letras:letras_
                                 {:
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_id + content_valor_char + content_esp_char;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_valor_id.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_esp_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) valor_id_ + (String) valor_char_ + (String) esp_char_;
+                                    RESULT = letras_;
                                 :}
-                            | VALOR_CHAR:valor_char_ VALOR_ID:valor_id_ CARACTERES_ESPECIALES:esp_char_
+                            | numero:numero_
                                 {:
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_char + content_valor_id + content_esp_char;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_valor_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_esp_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) valor_char_ + (String) valor_id_ + (String) esp_char_;
+                                    RESULT = numero_;
                                 :}
-                            | CARACTERES_ESPECIALES:esp_char_ VALOR_ID:valor_id_ VALOR_CHAR:valor_char_ 
+                            | CARACTERES:caracteres_
                                 {:
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_esp_char + content_valor_id + content_valor_char;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_esp_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ESP_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_char.getNodoTemporal(), "ESP_CHAR_ID", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) esp_char_ + (String) valor_id_ + (String) valor_char_;
+                                    RESULT = caracteres_;
                                 :}
-                            | CARACTERES_ESPECIALES:esp_char_ VALOR_CHAR:valor_char_ VALOR_ID:valor_id_
+                            | CARACTERES_ESPECIALES:caracteresEspeciales_
                                 {:
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_esp_char + content_valor_char + content_valor_id;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_esp_char.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ESP_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_id.getNodoTemporal(), "ESP_CHAR_ID", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) esp_char_ + (String) valor_char_ + (String) valor_id_;
-                                :}
-                            | VALOR_ID:valor_id_ CARACTERES_ESPECIALES:esp_char_ VALOR_CHAR:valor_char_
-                                {:
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_id + esp_char_ + content_valor_char;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_valor_id.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) valor_id_ + (String) esp_char_ + (String) valor_char_;
-                                :}
-                            | VALOR_CHAR:valor_char_ CARACTERES_ESPECIALES:esp_char_ VALOR_ID:valor_id_
-                                {:
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_char + content_esp_char + content_valor_id;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_valor_char.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_id.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) valor_char_ + (String) esp_char_ + (String) valor_id_;
-                                :}
-                            | VALOR_ID:valor_id_ CARACTERES_ESPECIALES:esp_char_
-                                {:
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    // Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    // String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_id + content_esp_char;
-                                    Nodo nuevoValorExpresion = new Nodo(res_valor_id.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) valor_id_ + (String) esp_char_;
-                                :}
-                            | CARACTERES_ESPECIALES:esp_char_ VALOR_ID:valor_id_
-                                {:
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    // Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    // String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_esp_char + content_valor_id;
-                                    Nodo nuevoValorExpresion = new Nodo(res_esp_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ESP_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) esp_char_ + (String) valor_id_;
-                                :}
-                            | VALOR_CHAR:valor_char_ CARACTERES_ESPECIALES:esp_char_
-                                {:
-                                    // Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    // String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_char + content_esp_char;
-                                    Nodo nuevoValorExpresion = new Nodo(res_valor_char.getNodoTemporal(), res_esp_char.getNodoTemporal(), "CHAR_ESP", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) valor_char_ + (String) esp_char_;
-                                :}
-                            | CARACTERES_ESPECIALES:esp_char_ VALOR_CHAR:valor_char_
-                                {:
-                                    // Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    
-                                    // String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_esp_char + content_valor_char;
-                                    Nodo nuevoValorExpresion = new Nodo(res_esp_char.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ESP_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) esp_char_ + (String) valor_char_;
-                                :}
-                            | VALOR_ID:valor_id_ VALOR_CHAR:valor_char_
-                                {:
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    // Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    // String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_id + content_valor_char;
-                                    Nodo nuevoValorExpresion = new Nodo(res_valor_id.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) valor_id_ + (String) valor_char_;
-                                :}
-                            | VALOR_CHAR:valor_char_ VALOR_ID:valor_id_
-                                {:
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    
-                                    // Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    // String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_char + content_valor_id;
-                                    Nodo nuevoValorExpresion = new Nodo(res_valor_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "CHAR_ID", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
-
-                                    RESULT = res;
-                                    // RESULT = (String) valor_char_ + (String) valor_id_;
-                                :}
-                            | VALOR_ID:valor_id_
-                                {:
-                                    Resultado res = (Resultado) valor_id_;
-                                    String content = res.getContenido();
-                                    System.out.println("[GRAM] REC VAL_EXP_VAL_ID: " + content);
-                                    RESULT = res;
-                                    // RESULT = valor_id_ + identificador_;
-                                    // RESULT = (String) valor_id_;
-                                :}
-                            | VALOR_CHAR:val_char_
-                                {:
-                                    Resultado res = (Resultado) val_char_;
-                                    String content = res.getContenido();
-                                    System.out.println("[GRAM] REC VAL_EXP_VAL_CHAR: " + content);
-                                    RESULT = res;
-                                    // RESULT = (String) val_char_;
-                                :}
-                    
-                            | CARACTERES_ESPECIALES:esp_char_
-                                {:
-                                    Nodo nuevoCaracterEsp = new Nodo(null, null, (String) esp_char_, parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoCaracterEsp, (String) esp_char_);
-                                    RESULT = res;
-                                    // RESULT = (String) esp_char_;
+                                    RESULT = caracteresEspeciales_;
                                 :}
                             ;
- // VALOR_ID:valor_id_
-                        //     {:
-                        //         // esultado res = (Resultado) valor_id_;
-                        //         // Resultado res = new Resultado(null, (String) valor_id_);
-                        //         // RESULT = res;
-                        //         // Nodo nuevoIdentificador = new Nodo(null, null, valor_id_, parser.contador);
-                        //         // parser.contador++;
-                        //         // Resultado res = new Resultado(nuevoIdentificador, valor_id_);
-                        //         // RESULT = res;
-                        //         RESULT = (Resultado) valor_id_;
-                        //         // RESULT = (String) valor_id_;
-                        //     :}
 
-// | CARACTERES_ESPECIALES:esp_char_izq VALOR_ID:valor_id_ CARACTERES_ESPECIALES:esp_char_der
-                        //     {:
-                        //         RESULT = esp_char_izq + valor_id_ + esp_char_der;
-                        //     :}
-                        // | CARACTERES_ESPECIALES:esp_char_izq VALOR_CHAR:valor_char_ CARACTERES_ESPECIALES:esp_char_der
-                        //     {:
-                        //         RESULT = esp_char_izq + valor_char_ + esp_char_der;
-                        //     :}
-                        // | CARACTERES_ESPECIALES:esp_char_ VALOR_ID:valor_id_
-                        //     {:
-                        //         RESULT = esp_char_ + valor_id_;
-                        //     :}
-                        // | CARACTERES_ESPECIALES:esp_char_ VALOR_CHAR:valor_char_
-                        //     {:
-                        //         RESULT = esp_char_ + valor_char_;
-                        //     :}
-                        // | VALOR_ID:valor_id_ CARACTERES_ESPECIALES:esp_char_
-                        //     {:
-                        //         RESULT = valor_id_ + esp_char_;
-                        //     :}
-                        // | VALOR_CHAR:valor_char_ CARACTERES_ESPECIALES:esp_char_
-                        //     {:
-                        //         RESULT = valor_char_ + esp_char_ ;
-                        //     :}
-                        // ;
+    // |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    // |||||||||||||||||||||||  EXPRESION  |||||||||||||||||||||||
+    // |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+        EXPRESION               ::=
+                                EXPRESION:exp_ ESTRUCTURA_EXPRESION:es_expresion_
+                                    {:
+                                        // ==============================================
+                                            // Nodo nuevasExpresiones = new Nodo((Nodo) exp_, (Nodo) es_expresion_, "LIST_EXP", parser.contador);
+                                            // parser.contador++;
+                                            // RESULT = nuevasExpresiones;
+                                        // ==============================================
 
-VALOR_ID                ::=
-                        VALOR_ID:valor_id_ valorIDConjunto:identificador_
-                            {:
-                                Nodo nuevoValorID = new Nodo(null, null, (String) valor_id_, parser.contador);
-                                parser.contador++;
-                                Nodo nuevoID = new Nodo(null, null, identificador_, parser.contador);
-                                parser.contador++;
-                                Nodo NuevoNodo = new Nodo(nuevoValorID, nuevoID, "IDS", parser.contador);
-                                parser.contador++;
-                                String content = valor_id_ + identificador_;
-                                System.out.println("[GRAM] REC VAL_ID: " + content);
-                                Resultado res = new Resultado(NuevoNodo, content);
-                                RESULT = res;
-                                // RESULT = (String) valor_id_ + (String) identificador_;
-                            :}
-                        | valorIDConjunto:identificador_
-                            {:
-                                Nodo NuevoNodo = new Nodo(null, null, identificador_, parser.contador);
-                                parser.contador++;
-                                System.out.println("[GRAM] REC VAL_ID: " + identificador_);
-                                Resultado res = new Resultado(NuevoNodo, identificador_);
-                                RESULT = res;
-                                // RESULT = (String) identificador_;
-                            :}
-                        ;
+                                        RESULT = (String) exp_ + (String) es_expresion_;
+                                    :}
+                                | ESTRUCTURA_EXPRESION:es_expresion_
+                                    {:
+                                        // RESULT = (Nodo) es_expresion_;
+                                        // ==============================================
 
-VALOR_CHAR              ::=
-                        VALOR_CHAR:valor_char_ cadena:cadena_
-                            {:
-                                Nodo nuevoValorChar = new Nodo(null, null, (String) valor_char_, parser.contador);
-                                parser.contador++;
-                                Nodo nuevoCadena = new Nodo(null, null, cadena_, parser.contador);
-                                parser.contador++;
-                                Nodo NuevoNodo = new Nodo(nuevoValorChar, nuevoCadena, "CHARS", parser.contador);
-                                parser.contador++;
-                                String content = valor_char_ + cadena_;
-                                System.out.println("[GRAM] REC VAL_CHAR: " + content);
-                                Resultado res = new Resultado(NuevoNodo, content);
-                                RESULT = res;
-                                // RESULT = (String) valor_char_ + cadena_;
-                            :}
-                        | cadena:cadena_
-                            {:
-                                Nodo NuevoNodo = new Nodo(null, null, cadena_, parser.contador);
-                                parser.contador++;
-                                System.out.println("[GRAM] REC VAL_CHAR: " + cadena_);
-                                Resultado res = new Resultado(NuevoNodo, cadena_);
-                                RESULT = res;
-                                // RESULT = cadena_;
-                            :}
-                        ;
-//                         comillasDobles:commillaA cadena:cadena_ comillasDobles:commillaC
-                        //      {:
-                        //         String content = commillaA + cadena_ + commillaC;
-                        //         Nodo nuevoCadena = new Nodo(null, null, content, parser.contador);
-                        //         parser.contador++;
-                        //         Resultado res = new Resultado(nuevoCadena, (String) content);
-                        //         RESULT = res;
-                        //         // RESULT = cadena_;
-                        //     :}
-                        // ;
-                       
+                                        RESULT = (String) es_expresion_;
+                                    :}
+                                ;
 
-TIPO_OPERACION          ::=
-                        TIPO_OPERACION:tipo_operacion_ OPERADOR:operador_
-                            {:
-                                Nodo nuevoTipoOp = new Nodo(null, null, (String) tipo_operacion_, parser.contador);
-                                parser.contador++;
-                                Nodo nuevoOperador = new Nodo(null, null, (String) operador_, parser.contador);
-                                parser.contador++;
-                                Nodo NuevoNodo = new Nodo( nuevoTipoOp, nuevoOperador, "OPS", parser.contador);
-                                parser.contador++;
-                                String content =  (String) tipo_operacion_ + (String) operador_;
-                                System.out.println("[GRAM] REC TIPO_OP: " + content);
-                                Resultado res = new Resultado(NuevoNodo, content);
-                                RESULT = res;
-                                // RESULT = (String) tipo_operacion_ + (String) operador_;
-                            :}
-                        | OPERADOR:operador_
-                            {:
-                                Nodo NuevoNodo = new Nodo(null, null, (String) operador_, parser.contador);
-                                parser.contador++;
-                                System.out.println("[GRAM] REC TIPO_OP: " + (String) operador_);
-                                Resultado res = new Resultado(NuevoNodo, (String) operador_);
-                                RESULT = res;
-                                // RESULT = (String) operador_;
-                            :}
-                        ;
+        ESTRUCTURA_EXPRESION    ::= 
+                                identificador:identificador_expresion guion mayorQue LISTA_EXPRESIONES:lista_expresiones_ puntoComa
+                                    {:
+                                        // ********************     Obteniendo expresiones    ********************
+                                        // ==============================================
+                                            // Resultado res = (Resultado) lista_expresiones_;
+                                            // Nodo nuevaListaExpresiones = res.getNodoTemporal();
+                                            // String content = res.getContenido();
+                                            // System.out.println("[GRAM] (sube) LIST_EXP: " + content);
+                                        
+                                        // ==============================================
+                                        // Ingresando valores en pila1
+                                            int contArbol = 0;
+                                            Stack<String> pilaTemp = new Stack<String>();
+                                            Instancias.listaExpresionesPila.add(parser.pilaValExps);
+                                            for (ValorExpresiones valExpTemp : parser.pilaValExps) {
+                                                pilaTemp.push(valExpTemp.getValor());
+                                                valExpTemp.mostrar();
+                                                Instancias.arbol_binario_expresiones.insertar(valExpTemp);
+                                                // contArbol++;
+                                            }
+                                        // *************** Insertando en abb ***************
+                                            // Copiando en stack temporal
+                                            Stack<ValorExpresiones> pilaValExpsCOPIA = new Stack<ValorExpresiones>();
+                                            // pilaValExpsCOPIA.addAll(pilaValExps);
+                                            
+                                            // pilaTemp.addAll(pilaValExps.getValor());
+                                            System.out.println("\nPila temporal, antes: ");
+                                            for(String val : pilaTemp){
+                                                System.out.print(val);
+                                            }
+                                            System.out.println("\n");
 
-OPERADOR                ::=
-                        asterisco:asterico_
-                            {:
-                                // Nodo nuevoAsterisco = new Nodo(null, null, asterico_, parser.contador);
-                                // parser.contador++;
-                                // Resultado res = new Resultado(nuevoAsterisco, asterico_);
-                                // RESULT = res;
-                                RESULT = asterico_;
-                            :}
-                        | punto:punto_
-                            {:
-                                // Nodo nuevoPunto = new Nodo(null, null, punto_, parser.contador);
-                                // parser.contador++;
-                                // Resultado res = new Resultado(nuevoPunto, punto_);
-                                // RESULT = res;
-                                RESULT = punto_;
-                            :}
-                        | mas:mas_
-                            {:
-                                // Nodo nuevoMas = new Nodo(null, null, mas_, parser.contador);
-                                // parser.contador++;
-                                // Resultado res = new Resultado(nuevoMas, mas_);
-                                // RESULT = res;
-                                RESULT = mas_;
-                            :}
-                        | interrogacion:interrogacion_
-                            {:
-                                // Nodo nuevoInterrogacion = new Nodo(null, null, interrogacion_, parser.contador);
-                                // parser.contador++;
-                                // Resultado res = new Resultado(nuevoInterrogacion, interrogacion_);
-                                // RESULT = res;
-                                RESULT = interrogacion_;
-                            :}
-                        | orBooleana:orBooleana_
-                            {:
-                                // Nodo nuevoOrBooleana = new Nodo(null, null, orBooleana_, parser.contador);
-                                // parser.contador++;
-                                // Resultado res = new Resultado(nuevoOrBooleana, orBooleana_);
-                                // RESULT = res;
-                                RESULT = orBooleana_;
-                            :}
-                        ;
-// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-// |||||||||||||||||||||||  LEXEMA  |||||||||||||||||||||||
-// ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-LEXEMA                  ::=
-                        LEXEMA ESTRUCTURA_LEXEMA
-                        | ESTRUCTURA_LEXEMA
-                        ;
+                                            int tam_pila = parser.pilaValExps.size();
+                                            for (int i = tam_pila - 1; i >= 0; i--) {
+                                                String tipo = parser.pilaValExps.get(i).getTipo();
+                                                
+                                                if(tipo == "OP"){
 
-ESTRUCTURA_LEXEMA       ::=
-                        identificador:identificador_lexema dosPuntos LISTA_LEXEMAS:lista_lexemas_ puntoComa
-                            {:
-                                // ********************     Obteniendo lexemas    ********************
-                                StringBuilder temp_lex = new StringBuilder();
-                                temp_lex.append(lista_lexemas_);
-                                System.out.println("\nLexema reconocido: " + temp_lex.toString() + "\n");
-                                Instancias.listaLexemas.add(new Lexema(Instancias.contador_lexemas, identificador_lexema, temp_lex.toString()));
-                                Instancias.contador_lexemas++;
-                            :}
-                        ;
+                                                    char tipo_c = parser.pilaValExps.get(i).getValor().charAt(0);
+                                                    if(esOperadorUnario(tipo_c)){
+                                                        System.out.println("Tipo OP unaria: " + tipo_c);
+                                                        // String op_unario = valExpTemp.getValor();
+                                                        ValorExpresiones op_unario = parser.pilaValExps.get(i);
+                                                        System.out.println("Insertando OP UN: " + op_unario.getValor());
+                                                        pilaValExpsCOPIA.push(op_unario);
+                                                        ValorExpresiones val1 = pilaValExpsCOPIA.get(1);
+                                                        if(val1.getTipo() != "OP"){
+                                                            pilaValExpsCOPIA.pop();
+                                                            ValorExpresiones val1_ = pilaValExpsCOPIA.pop();
+                                                            System.out.println("Insertando VAL UN: " + val1_.getValor());
+                                                            pilaValExpsCOPIA.push(op_unario);
+                                                            pilaValExpsCOPIA.push(val1_);
+                                                            // pilaValExpsCOPIA.push(val1_);
+                                                        }
+                                                        if(val1.isEmpty()){
+                                                            
+                                                        }
+                                                                                                              
+                                                        
+                                                    } else {
+                                                        System.out.println("Tipo OP dual: " + tipo_c);
+                                                        ValorExpresiones op = parser.pilaValExps.get(i);
+                                                        
 
-LISTA_LEXEMAS           ::=
-                        LISTA_LEXEMAS cadena:cadena_
-                            {:
-                                RESULT = cadena_;
-                            :}
-                        | cadena:cadena_
-                            {:
-                                RESULT = cadena_;
-                            :}
-                        ;
+                                                        ValorExpresiones val = pilaValExpsCOPIA.get(0);
+                                                        System.out.println("val: " + val.getTipo());
+                                                        if(val.getTipo() != "OP"){
+                                                            ValorExpresiones val_ = pilaValExpsCOPIA.pop();
+                                                            System.out.println("Insertando VAL DU: " + val_.getValor());
+                                                            pilaValExpsCOPIA.push(val_);
+                                                            System.out.println("Insertando OP DU: " + op.getValor());
+                                                            pilaValExpsCOPIA.push(op);
+                                                            ValorExpresiones val1 = pilaValExpsCOPIA.get(1);
+                                                            System.out.println("val1: " + val1.getTipo());
+                                                            if(val1.getTipo() != "OP"){
+                                                                pilaValExpsCOPIA.pop();
+                                                                ValorExpresiones val1_ = pilaValExpsCOPIA.pop();
+                                                                System.out.println("Insertando VAL 1 DU: " + val1_.getValor());
+                                                                pilaValExpsCOPIA.push(op);
+                                                                pilaValExpsCOPIA.push(val1_);
+                                                            }
+                                                        }
+                                                        
+
+                                                        // pilaValExpsCOPIA.push(val);
+                                                        // pilaValExpsCOPIA.push(op);
+                                                        // pilaValExpsCOPIA.push(val1);
+                                                        
+                                                    }
+                                                } else {
+                                                    
+                                                    ValorExpresiones val = parser.pilaValExps.get(i);
+                                                    System.out.println("VAL OUT: " + val.getValor());
+                                                    pilaValExpsCOPIA.push(val);
+                                                }
+                                                
+                                                // Instancias.arbol_binario_expresiones.
+                                            }
+
+                                            // System.out.println("\nPila temporal: ");
+                                            // for(String val : pilaTemp){
+                                            //     System.out.print(val);
+                                            // }
+                                            System.out.println("\nPila despues xdd: ");
+                                            for (ValorExpresiones valExpTemp : pilaValExpsCOPIA) {
+                                                System.out.print(valExpTemp.getValor());
+                                            }
+                                            System.out.println("\n");
+
+                                            parser.pilaValExps.clear();
+                                            parser.contador_val_expresiones = 0;
+                                        // ==============================================
+
+                                        String content = (String) lista_expresiones_;
+                                        StringBuilder temp_exp = new StringBuilder();
+                                        temp_exp.append((String) content);
+                                        System.out.println("\nExpresion reconocida: " + temp_exp.toString() + "\n");
+                                        Instancias.listaExpresiones.add(new Expresion(Instancias.contador_expresiones, identificador_expresion, temp_exp.toString()));
+                                        Instancias.contador_expresiones++;
+                                        // RESULT = nuevaListaExpresiones;
+                                        RESULT = lista_expresiones_;
+                                    :}
+                                ;
+
+        // ==============================================
+            // CARACTERES_ESPECIALES   ::=
+            //                         comillasDoblesEspecial
+            //                         | comillaSimpleEspecial
+            //                         | saltoLineaEspecial
+            //                         ;
+
+        LISTA_EXPRESIONES       ::=
+                                LISTA_EXPRESIONES:lista_exp_ TIPO_OPERACION:tipo_operacion_ VALOR_EXPRESION:valor_expresion_der
+                                    {:
+                                        // ==============================================
+                                            // Recuperando valores
+                                            // Resultado res_lista_exp_ = (Resultado) lista_exp_;
+                                            // Resultado res_tipo_op = (Resultado) tipo_operacion_;
+                                            // Resultado res_valor_exp_der = (Resultado) valor_expresion_der;
+                                            // String content_tipo_op = res_tipo_op.getContenido();
+                                            // String content_valor_lista_exp_ = res_lista_exp_.getContenido();
+                                            // String content_valor_exp_der = res_valor_exp_der.getContenido();
+                                            // String content = content_valor_lista_exp_ + content_tipo_op + content_valor_exp_der;
+                                            // // Decidiendo
+                                            // Nodo nuevoExpresion = new Nodo(res_lista_exp_.getNodoTemporal(), res_tipo_op.getNodoTemporal(), "LIST_TOP", parser.contador);
+                                            // parser.contador++;
+                                            // Nodo nuevaOperacion = new Nodo(nuevoExpresion, res_valor_exp_der.getNodoTemporal(), "LIST_TOP_VALEXP", parser.contador);
+                                            // parser.contador++;
+                                            // // Resultado res_lista_exp_ = (Resultado) lista_exp_;
+                                            // // System.out.println("contttt: \t\t" + res_lista_exp_.getContenido());
+                                            // // String content = res_lista_exp_.getContenido() + (String) tipo_operacion_ + (String) valor_expresion_der;
+                                            // // String content = (String) lista_exp_ + (String) tipo_operacion_ + (String) valor_expresion_der;
+                                            // Resultado res = new Resultado(nuevaOperacion, content);
+                                            // // String content = res.getContenido();
+                                            // System.out.println("[GRAM] (padre) LIST_TOP_VALEXP: " + content);
+                                            // RESULT = res;
+                                        // ==============================================
+
+                                        String content = (String) lista_exp_ + (String) tipo_operacion_ + (String) valor_expresion_der;
+                                        RESULT = content;
+                                    :}
+                                | TIPO_OPERACION:tipo_operacion_ VALOR_EXPRESION:valor_expresion_der
+                                    {:
+                                        // ==============================================
+                                            // Resultado res_tipo_op = (Resultado) tipo_operacion_;
+                                            // Resultado res_valor_exp_der = (Resultado) valor_expresion_der;
+                                            // String content_tipo_op = res_tipo_op.getContenido();
+                                            // String content_valor_exp_der = res_valor_exp_der.getContenido();
+                                            // String content = content_tipo_op + content_valor_exp_der;
+                                            // // Decidiendo
+                                            // Nodo nuevoExpresion = new Nodo(res_tipo_op.getNodoTemporal(), res_valor_exp_der.getNodoTemporal(), "TOP_VALEXP", parser.contador);
+                                            // parser.contador++; 
+                                            // Resultado res = new Resultado(nuevoExpresion, content);
+                                            // System.out.println("[GRAM] (padre) TOP_VALEXP: " + content);
+                                            // RESULT = res;
+                                        // ==============================================
+
+                                        String content = (String) tipo_operacion_ + (String) valor_expresion_der;
+                                        RESULT = content;
+                                    :}
+                                ;
+
+        VALOR_EXPRESION         ::=
+
+                                    VALOR_ID:valor_id_ VALOR_CHAR:valor_char_ CARACTERES_ESPECIALES:esp_char_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_id + content_valor_char + co ntent_esp_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ID_CHAR_ESP: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_valor_id.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_esp_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_id_ + (String) valor_char_ + (String) esp_char_;
+                                        :}
+                                    | VALOR_CHAR:valor_char_ VALOR_ID:valor_id_ CARACTERES_ESPECIALES:esp_char_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_char + content_valor_id + content_esp_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_CHAR_ID_ESP: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_valor_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_esp_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_char_ + (String) valor_id_ + (String) esp_char_;
+                                        :}
+                                    | CARACTERES_ESPECIALES:esp_char_ VALOR_ID:valor_id_ VALOR_CHAR:valor_char_ 
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_esp_char + content_valor_id + content_valor_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ESP_ID_CHAR: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_esp_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ESP_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_char.getNodoTemporal(), "ESP_CHAR_ID", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) esp_char_ + (String) valor_id_ + (String) valor_char_;
+                                        :}
+                                    | CARACTERES_ESPECIALES:esp_char_ VALOR_CHAR:valor_char_ VALOR_ID:valor_id_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_esp_char + content_valor_char + content_valor_id;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ESP_CHAR_ID: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_esp_char.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ESP_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_id.getNodoTemporal(), "ESP_CHAR_ID", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) esp_char_ + (String) valor_char_ + (String) valor_id_;
+                                        :}
+                                    | VALOR_ID:valor_id_ CARACTERES_ESPECIALES:esp_char_ VALOR_CHAR:valor_char_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_id + esp_char_ + content_valor_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ID_ESP_CHAR: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_valor_id.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_id_ + (String) esp_char_ + (String) valor_char_;
+                                        :}
+                                    | VALOR_CHAR:valor_char_ CARACTERES_ESPECIALES:esp_char_ VALOR_ID:valor_id_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_char + content_esp_char + content_valor_id;
+                                                // System.out.println("[GRAM] (padre) VALEXP_CHAR_ESP_ID: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_valor_char.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_id.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_char_ + (String) esp_char_ + (String) valor_id_;
+                                        :}
+                                    | VALOR_ID:valor_id_ CARACTERES_ESPECIALES:esp_char_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_id + content_esp_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ID_ESP: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_valor_id.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;                                            
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_id_ + (String) esp_char_;
+                                        :}
+                                    | CARACTERES_ESPECIALES:esp_char_ VALOR_ID:valor_id_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_esp_char + content_valor_id;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ESP_ID: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_esp_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ESP_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) esp_char_ + (String) valor_id_;
+                                        :}
+                                    | VALOR_CHAR:valor_char_ CARACTERES_ESPECIALES:esp_char_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_char + content_esp_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ESP_CHAR: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_valor_char.getNodoTemporal(), res_esp_char.getNodoTemporal(), "CHAR_ESP", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_char_ + (String) esp_char_;
+                                        :}
+                                    | CARACTERES_ESPECIALES:esp_char_ VALOR_CHAR:valor_char_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                
+                                                // // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_esp_char + content_valor_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_CHAR_ESP: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_esp_char.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ESP_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) esp_char_ + (String) valor_char_;
+                                        :}
+                                    | VALOR_ID:valor_id_ VALOR_CHAR:valor_char_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_id + content_valor_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ID_CHAR: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_valor_id.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_id_ + (String) valor_char_;
+                                        :}
+                                    | VALOR_CHAR:valor_char_ VALOR_ID:valor_id_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                
+                                                // // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_char + content_valor_id;
+                                                // System.out.println("[GRAM] (padre) VALEXP_CHAR_ID: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_valor_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "CHAR_ID", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
+
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_char_ + (String) valor_id_;
+                                        :}
+                                    | VALOR_ID:valor_id_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res = (Resultado) valor_id_;
+                                                // String content = res.getContenido();
+                                                // System.out.println("[GRAM] (sube) VALEXP_ID: " + content);
+                                                // RESULT = res;
+                                                // RESULT = valor_id_ + identificador_;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_id_;
+                                        :}
+                                    | VALOR_CHAR:valor_char_
+                                        {:
+                                            // ==============================================
+                                                // Resultado res = (Resultado) val_char_;
+                                                // String content = res.getContenido();
+                                                // System.out.println("[GRAM] (sube) VALEXP_CHAR: " + content);
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_char_;
+                                        :}
+                            
+                                    | CARACTERES_ESPECIALES:esp_char_
+                                        {:
+                                            // ==============================================
+                                                // Nodo nuevoCaracterEsp = new Nodo(null, null, (String) esp_char_, parser.contador);
+                                                // parser.contador++;
+                                                // System.out.println("[GRAM] (hoja) VALEXP_ESP: " + esp_char_);
+                                                // Resultado res = new Resultado(nuevoCaracterEsp, (String) esp_char_);
+                                                // RESULT = res;
+                                            // ==============================================
+                                            parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            parser.contador_val_expresiones++;
+
+                                            RESULT = (String) esp_char_;
+                                        :}
+                                    ;
+                            // ==============================================
+                                // VALOR_ID:valor_id_
+                                //     {:
+                                //         // esultado res = (Resultado) valor_id_;
+                                //         // Resultado res = new Resultado(null, (String) valor_id_);
+                                //         // RESULT = res;
+                                //         // Nodo nuevoIdentificador = new Nodo(null, null, valor_id_, parser.contador);
+                                //         // parser.contador++;
+                                //         // Resultado res = new Resultado(nuevoIdentificador, valor_id_);
+                                //         // RESULT = res;
+                                //         RESULT = (Resultado) valor_id_;
+                                //         // RESULT = (String) valor_id_;
+                                //     :}
+
+                                // | CARACTERES_ESPECIALES:esp_char_izq VALOR_ID:valor_id_ CARACTERES_ESPECIALES:esp_char_der
+                                //     {:
+                                //         RESULT = esp_char_izq + valor_id_ + esp_char_der;
+                                //     :}
+                                // | CARACTERES_ESPECIALES:esp_char_izq VALOR_CHAR:valor_char_ CARACTERES_ESPECIALES:esp_char_der
+                                //     {:
+                                //         RESULT = esp_char_izq + valor_char_ + esp_char_der;
+                                //     :}
+                                // | CARACTERES_ESPECIALES:esp_char_ VALOR_ID:valor_id_
+                                //     {:
+                                //         RESULT = esp_char_ + valor_id_;
+                                //     :}
+                                // | CARACTERES_ESPECIALES:esp_char_ VALOR_CHAR:valor_char_
+                                //     {:
+                                //         RESULT = esp_char_ + valor_char_;
+                                //     :}
+                                // | VALOR_ID:valor_id_ CARACTERES_ESPECIALES:esp_char_
+                                //     {:
+                                //         RESULT = valor_id_ + esp_char_;
+                                //     :}
+                                // | VALOR_CHAR:valor_char_ CARACTERES_ESPECIALES:esp_char_
+                                //     {:
+                                //         RESULT = valor_char_ + esp_char_ ;
+                                //     :}
+                                // ;
+
+        VALOR_ID                ::=
+                                VALOR_ID:valor_id_ valorIDConjunto:identificador_
+                                    {:
+                                        // ==============================================
+                                            // Nodo nuevoValorID = new Nodo(null, null, (String) valor_id_, parser.contador);
+                                            // parser.contador++;
+                                            // Nodo nuevoID = new Nodo(null, null, identificador_, parser.contador);
+                                            // parser.contador++;
+                                            // Nodo NuevoNodo = new Nodo(nuevoValorID, nuevoID, "IDS", parser.contador);
+                                            // parser.contador++;
+                                            // String content = (String) valor_id_ + identificador_;
+                                            // System.out.println("[GRAM] (padre) VAL_ID: " + content);
+                                            // Resultado res = new Resultado(NuevoNodo, content);
+                                            // RESULT = res;
+                                        // ==============================================
+                                        // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                        // parser.contador_val_expresiones++;
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, identificador_, "ID"));
+                                        parser.contador_val_expresiones++;
+
+                                        RESULT = (String) valor_id_ + (String) identificador_;
+                                    :}
+                                | valorIDConjunto:identificador_
+                                    {:
+                                        // ==============================================
+                                            // Nodo NuevoNodo = new Nodo(null, null, identificador_, parser.contador);
+                                            // parser.contador++;
+                                            // System.out.println("[GRAM] (hoja) VAL_ID: " + identificador_);
+                                            // Resultado res = new Resultado(NuevoNodo, identificador_);
+                                            // RESULT = res;
+                                        // ==============================================
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, identificador_, "ID"));
+                                        parser.contador_val_expresiones++;
+
+                                        RESULT = (String) identificador_;
+                                    :}
+                                ;
+
+        VALOR_CHAR              ::=
+                                VALOR_CHAR:valor_char_ cadena:cadena_
+                                    {:
+                                        // ==============================================
+                                            // Nodo nuevoValorChar = new Nodo(null, null, (String) valor_char_, parser.contador);
+                                            // parser.contador++;
+                                            // Nodo nuevoCadena = new Nodo(null, null, cadena_, parser.contador);
+                                            // parser.contador++;
+                                            // Nodo NuevoNodo = new Nodo(nuevoValorChar, nuevoCadena, "CHARS", parser.contador);
+                                            // parser.contador++;
+                                            // String content = (String) valor_char_ + cadena_;
+                                            // System.out.println("[GRAM] (padre) VAL_CHAR: " + content);
+                                            // Resultado res = new Resultado(NuevoNodo, content);
+                                            // RESULT = res;
+                                        // ==============================================
+                                        // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                        // parser.contador_val_expresiones++;
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, cadena_, "CHAR"));
+                                        parser.contador_val_expresiones++;
+                                        
+                                        RESULT = (String) valor_char_ + cadena_;
+                                    :}
+                                | cadena:cadena_
+                                    {:
+                                    // ==============================================
+                                        // Nodo NuevoNodo = new Nodo(null, null, cadena_, parser.contador);
+                                        // parser.contador++;
+                                        // System.out.println("[GRAM] (hoja) VAL_CHAR: " + cadena_);
+                                        // Resultado res = new Resultado(NuevoNodo, cadena_);
+                                        // RESULT = res;
+                                    // ==============================================
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, cadena_, "CHAR"));
+                                        parser.contador_val_expresiones++;
+
+                                        RESULT = cadena_;
+                                    :}
+                                ;
+                            // ==============================================
+                                // comillasDobles:commillaA cadena:cadena_ comillasDobles:commillaC
+                                //      {:
+                                //         String content = commillaA + cadena_ + commillaC;
+                                //         Nodo nuevoCadena = new Nodo(null, null, content, parser.contador);
+                                //         parser.contador++;
+                                //         Resultado res = new Resultado(nuevoCadena, (String) content);
+                                //         RESULT = res;
+                                //         // RESULT = cadena_;
+                                //     :}
+                                // ;
+                            
+
+        TIPO_OPERACION          ::=
+                                TIPO_OPERACION:tipo_operacion_ OPERADOR:operador_
+                                    {:
+                                    // ==============================================
+                                        // Nodo nuevoTipoOp = new Nodo(null, null, (String) tipo_operacion_, parser.contador);
+                                        // parser.contador++;
+                                        // Nodo nuevoOperador = new Nodo(null, null, (String) operador_, parser.contador);
+                                        // parser.contador++;
+                                        // Nodo NuevoNodo = new Nodo( nuevoTipoOp, nuevoOperador, "OPS", parser.contador);
+                                        // parser.contador++;
+                                        // String content =  (String) tipo_operacion_ + (String) operador_;
+                                        // System.out.println("[GRAM] (padre) TIPO_OP: " + content);
+                                        // Resultado res = new Resultado(NuevoNodo, content);
+                                        // RESULT = res;
+                                    // ==============================================
+                                        // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) tipo_operacion_, "OP"));
+                                        // parser.contador_val_expresiones++;
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) operador_, "OP"));
+                                        parser.contador_val_expresiones++;
+
+                                        RESULT = (String) tipo_operacion_ + (String) operador_;
+                                    :}
+                                | OPERADOR:operador_
+                                    {:
+                                    // ==============================================
+                                        // Nodo NuevoNodo = new Nodo(null, null, (String) operador_, parser.contador);
+                                        // parser.contador++;
+                                        // System.out.println("[GRAM] (hoja) TIPO_OP: " + (String) operador_);
+                                        // Resultado res = new Resultado(NuevoNodo, (String) operador_);
+                                        // RESULT = res;
+                                    // ==============================================
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) operador_, "OP"));
+                                        parser.contador_val_expresiones++;
+
+                                        RESULT = (String) operador_;
+                                    :}
+                                ;
+
+        OPERADOR                ::=
+                                asterisco:asterico_
+                                    {:
+                                    // ==============================================
+                                        // Nodo nuevoAsterisco = new Nodo(null, null, asterico_, parser.contador);
+                                        // parser.contador++;
+                                        // Resultado res = new Resultado(nuevoAsterisco, asterico_);
+                                        // RESULT = res;
+                                    // ==============================================
+
+                                        RESULT = asterico_;
+                                    :}
+                                | punto:punto_
+                                    {:
+                                    // ==============================================
+                                        // Nodo nuevoPunto = new Nodo(null, null, punto_, parser.contador);
+                                        // parser.contador++;
+                                        // Resultado res = new Resultado(nuevoPunto, punto_);
+                                        // RESULT = res;
+                                    // ==============================================
+
+                                        RESULT = punto_;
+                                    :}
+                                | mas:mas_
+                                    {:
+                                    // ==============================================
+                                        // Nodo nuevoMas = new Nodo(null, null, mas_, parser.contador);
+                                        // parser.contador++;
+                                        // Resultado res = new Resultado(nuevoMas, mas_);
+                                        // RESULT = res;
+                                    // ==============================================
+
+                                        RESULT = mas_;
+                                    :}
+                                | interrogacion:interrogacion_
+                                    {:
+                                    // ==============================================
+                                        // Nodo nuevoInterrogacion = new Nodo(null, null, interrogacion_, parser.contador);
+                                        // parser.contador++;
+                                        // Resultado res = new Resultado(nuevoInterrogacion, interrogacion_);
+                                        // RESULT = res;
+                                    // ==============================================
+
+                                        RESULT = interrogacion_;
+                                    :}
+                                | orBooleana:orBooleana_
+                                    {:
+                                    // ==============================================
+                                        // Nodo nuevoOrBooleana = new Nodo(null, null, orBooleana_, parser.contador);
+                                        // parser.contador++;
+                                        // Resultado res = new Resultado(nuevoOrBooleana, orBooleana_);
+                                        // RESULT = res;
+                                    
+                                    // ==============================================
+
+                                        RESULT = orBooleana_;
+                                    :}
+                                ;
+    // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    // |||||||||||||||||||||||  LEXEMA  |||||||||||||||||||||||
+    // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+        LEXEMA                  ::=
+                                LEXEMA ESTRUCTURA_LEXEMA
+                                | ESTRUCTURA_LEXEMA
+                                ;
+
+        ESTRUCTURA_LEXEMA       ::=
+                                identificador:identificador_lexema dosPuntos LISTA_LEXEMAS:lista_lexemas_ puntoComa
+                                    {:
+                                        // ********************     Obteniendo lexemas    ********************
+                                        StringBuilder temp_lex = new StringBuilder();
+                                        temp_lex.append(lista_lexemas_);
+                                        System.out.println("\nLexema reconocido: " + temp_lex.toString() + "\n");
+                                        Instancias.listaLexemas.add(new Lexema(Instancias.contador_lexemas, identificador_lexema, temp_lex.toString()));
+                                        Instancias.contador_lexemas++;
+                                    :}
+                                ;
+
+        LISTA_LEXEMAS           ::=
+                                LISTA_LEXEMAS cadena:cadena_
+                                    {:
+                                        RESULT = cadena_;
+                                    :}
+                                | cadena:cadena_
+                                    {:
+                                        RESULT = cadena_;
+                                    :}
+                                ;

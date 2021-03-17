@@ -5,11 +5,23 @@
  */
 package com.proyecto1.interfaz;
 import com.proyecto1.analizadores.*;
+import com.proyecto1.archivos.Lectura;
 import com.proyecto1.estructuras.Instancias;
+import com.proyecto1.estructuras.abb.ABB;
 //import com.proyecto1.estructuras.pojos.TError;
 import com.proyecto1.estructuras.arbol.*;
+import com.proyecto1.estructuras.avl.ArbolAVL;
 import com.proyecto1.estructuras.pojos.*;
+import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
+import java.util.Iterator;
+import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -23,6 +35,7 @@ public class Pantalla_principal extends javax.swing.JFrame {
     
     public static String list_of_names="";
     public Pantalla_principal() {
+        Instancias.arbol_binario_expresiones = new ArbolAVL();
         initComponents();
     }
 
@@ -44,7 +57,7 @@ public class Pantalla_principal extends javax.swing.JFrame {
         labelTXTEntrada1 = new javax.swing.JLabel();
         btnGenerarAutomata = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTree1 = new javax.swing.JTree();
+        jtreeOpciones = new javax.swing.JTree();
         canvas1 = new java.awt.Canvas();
         jComboBox1 = new javax.swing.JComboBox<>();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -76,20 +89,25 @@ public class Pantalla_principal extends javax.swing.JFrame {
 
         labelTXTEntrada1.setText("Archivo de entrada");
 
-        btnGenerarAutomata.setText("Analizar entrada");
+        btnGenerarAutomata.setText("Generar automata");
         btnGenerarAutomata.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnGenerarAutomataActionPerformed(evt);
             }
         });
 
-        jScrollPane3.setViewportView(jTree1);
+        jScrollPane3.setViewportView(jtreeOpciones);
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         menuArchivo.setText("Archivo");
 
         menuAbrir.setText("Abrir");
+        menuAbrir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuAbrirActionPerformed(evt);
+            }
+        });
         menuArchivo.add(menuAbrir);
 
         menuGuardar.setText("Guardar");
@@ -123,17 +141,19 @@ public class Pantalla_principal extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(50, 50, 50)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jScrollPane1)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 344, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(labelTXTEntrada1)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
                             .addComponent(labelTXTSalida)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(87, 87, 87)
                         .addComponent(btnGenerarAutomata)
                         .addGap(51, 51, 51)
-                        .addComponent(btnCompilar)))
-                .addGap(64, 64, 64)
+                        .addComponent(btnCompilar))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(27, 27, 27)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 405, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(26, 26, 26)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -160,8 +180,8 @@ public class Pantalla_principal extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(labelTXTSalida)
                         .addGap(18, 18, 18)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(33, 33, 33))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(21, 21, 21))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -210,20 +230,61 @@ public class Pantalla_principal extends javax.swing.JFrame {
             
             // Mostrando listas de conjuntos
             System.out.println("\nLista de conjuntos:");
-            
+            String reconocido = "";
             for (Conjunto conjuntoTemporal : Instancias.listaConjuntos) {
                 conjuntoTemporal.mostrar();
+                reconocido += "\nCONJUNTOS:\n";
+                reconocido += conjuntoTemporal.mostrarStr();
             }
             // Mostrando listas de expresiones
             System.out.println("\nLista de expresiones:");
             for (Expresion expresionTemporal : Instancias.listaExpresiones) {
                 expresionTemporal.mostrar();
+                reconocido += "\nEXPRESIONES:\n";
+                reconocido += expresionTemporal.mostrarStr();
             }
             // Mostrando listas de lexemas
             System.out.println("\nLista de lexemas:");
             for (Lexema lexemaTemporal : Instancias.listaLexemas) {
                 lexemaTemporal.mostrar();
+                reconocido += "\nLEXEMAS:\n";
+                reconocido += lexemaTemporal.mostrarStr();
             }
+            txtSalida.setText(reconocido);
+            txtSalida.updateUI();
+            
+            // STACK EXP
+//            for (Iterator i = Instancias.listaExpresionesPila.iterator(); i.hasNext();) {
+//            for (Object a : Instancias.listaExpresionesPila) {
+//                System.out.println("\nPila de expresiones: ");
+//                for (ValorExpresiones pilaValExpTemp : (Stack<ValorExpresiones>) a ) {
+//                    pilaValExpTemp.mostrar();
+//                }
+//            }
+            
+            System.out.println("\nArbol: ");
+//            
+//             if(!Instancias.arbol_binario_expresiones.esVacio()){
+//                    Instancias.arbol_binario_expresiones.inorder();
+//                    try {
+//                        Instancias.arbol_binario_expresiones.graficar("grafo");
+//                        JOptionPane.showMessageDialog(null, "Se grafico el arbol binario de busqueda, de capas.", 
+//                        "Informacion", JOptionPane.INFORMATION_MESSAGE);
+//                    } catch (IOException ex) {
+//                        Logger.getLogger(Pantalla_principal.class.getName()).log(Level.SEVERE, null, ex);
+//                    } catch (InterruptedException ex) {
+//                        Logger.getLogger(Pantalla_principal.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+//                }else{
+//                    JOptionPane.showMessageDialog(null, "No se han cargado las capas", 
+//                    "Atencion", JOptionPane.WARNING_MESSAGE);
+//                }
+//            Stack<ValorExpresiones> a = (Stack<ValorExpresiones>) Instancias.listaExpresionesPila.get(0);
+//            System.out.println("Tam lista pilas: " + Instancias.listaExpresionesPila.size());
+//            System.out.println("Tam pila: " + a.size());
+//            for (ValorExpresiones pilaValExpTemp : a ) {
+//                pilaValExpTemp.mostrar();
+//            }
         } catch (Exception e) {
         }
     }//GEN-LAST:event_btnCompilarActionPerformed
@@ -239,6 +300,33 @@ public class Pantalla_principal extends javax.swing.JFrame {
     private void btnGenerarAutomataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerarAutomataActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnGenerarAutomataActionPerformed
+// File Chooser
+    String directorio_archivos = "C:\\Users\\Gonzalo\\Desktop\\Entrada";
+    final JFileChooser fc = new JFileChooser(directorio_archivos);
+    private void menuAbrirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAbrirActionPerformed
+        // TODO add your handling code here:
+//        if(avl_usuarios.esVacio()){
+            fc.setFileFilter(new FileNameExtensionFilter("Archivos de entrada", "olc", "olc"));
+            int valor = fc.showOpenDialog(null);
+            if(valor == JFileChooser.APPROVE_OPTION){
+                File archivo = fc.getSelectedFile();
+                String ruta = archivo.getAbsolutePath();
+    //            System.out.println(ruta);
+                try {
+                    txtEntrada.setText(Lectura.leer(ruta));
+                    JOptionPane.showMessageDialog(null, "Se ha terminado de leer el archivo de entrada.", 
+                            "Informacion", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException ex) {
+                    Logger.getLogger(Pantalla_principal.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Pantalla_principal.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+//        }else{
+//            JOptionPane.showMessageDialog(null, "Ya se han cargado los usuarios", 
+//            "Atencion", JOptionPane.WARNING_MESSAGE);
+//        }
+    }//GEN-LAST:event_menuAbrirActionPerformed
 
     /**
      * @param args the command line arguments
@@ -284,7 +372,7 @@ public class Pantalla_principal extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JTree jTree1;
+    private javax.swing.JTree jtreeOpciones;
     private javax.swing.JLabel labelTXTEntrada1;
     private javax.swing.JLabel labelTXTSalida;
     private javax.swing.JMenuItem menuAbrir;

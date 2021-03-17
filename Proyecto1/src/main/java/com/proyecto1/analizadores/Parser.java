@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import com.proyecto1.interfaz.*;
 import com.proyecto1.estructuras.arbol.*;
 import com.proyecto1.estructuras.pojos.*;
+import com.proyecto1.estructuras.abb.*;
 import com.proyecto1.estructuras.Instancias;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -307,121 +308,145 @@ public class Parser extends java_cup.runtime.lr_parser {
 
 
 
-   public static Nodo raiz;
-   public static int contador = 1;
-   public static String resultado = "";
-   public static LinkedList<TError> TablaES = new LinkedList<TError>();
-    // Variables para identificadores de conjuntos
-    // public static StringBuilder valorConjuntoSB =  new StringBuilder();
-//     public static LinkedList<Conjunto> listaConjuntos = new LinkedList<Conjunto>();
-// //    public static LinkedList<Conjunto> listaConjuntos;
-// //    public static LinkedList<String> listaValoresConjuntos = new LinkedList<String>();
-// //    public static Stack<String> identificadoresConjuntos = new Stack<String>();
-// //    public static Conjunto conjunto_temporal;
-//     public static int contador_conjuntos = 0;
-//     // ::::::::::::::::::::::::::::     EXPRESIONES       ::::::::::::::::::::::::::::
-//     public static LinkedList<Expresion> listaExpresiones = new LinkedList<Expresion>();
-// //    public static LinkedList<Expresion> listaExpresiones;
-//     public static int contador_expresiones = 0;
-//     // ::::::::::::::::::::::::::::     LEXEMAS       ::::::::::::::::::::::::::::
-//     public static LinkedList<Lexema> listaLexemas = new LinkedList<Lexema>();
-// //    public static LinkedList<Lexema> listaLexemas;    
-//     public static int contador_lexemas = 0;
-    
-    //-------------------------------------------   Graficar arbol  ---------------------------------------------
-    public static void graficarArbol(Nodo act, String nombre){
-        FileWriter fichero = null;
-        PrintWriter pw = null;
-        try {
-            fichero = new FileWriter("C:\\Users\\G\\Desktop\\" + nombre + ".dot");
-            pw = new PrintWriter(fichero);
-            pw.println("digraph G{");
-            pw.println("rankdir=UD");
-            pw.println("node[shape=box]");
-            pw.println("concentrate=true");
-            pw.println(act.getCodigoInterno());
-            pw.println("}");
-        } catch (Exception e) {
-            System.out.println("error, no se realizo el archivo");
-        } finally {
-            try {
-                if (null != fichero) {
-                    fichero.close();
+            public static Nodo raiz;
+            public static int contador = 1;
+            public static String resultado = "";
+            public static LinkedList<TError> TablaES = new LinkedList<TError>();
+            public static Stack<ValorExpresiones> pilaValExps = new Stack<ValorExpresiones>();
+            
+            public static int contador_val_expresiones = 0;
+                // Variables para identificadores de conjuntos
+                // public static StringBuilder valorConjuntoSB =  new StringBuilder();
+            //     public static LinkedList<Conjunto> listaConjuntos = new LinkedList<Conjunto>();
+            // //    public static LinkedList<Conjunto> listaConjuntos;
+            // //    public static LinkedList<String> listaValoresConjuntos = new LinkedList<String>();
+            // //    public static Stack<String> identificadoresConjuntos = new Stack<String>();
+            // //    public static Conjunto conjunto_temporal;
+            //     public static int contador_conjuntos = 0;
+            //     // ::::::::::::::::::::::::::::     EXPRESIONES       ::::::::::::::::::::::::::::
+            //     public static LinkedList<Expresion> listaExpresiones = new LinkedList<Expresion>();
+            // //    public static LinkedList<Expresion> listaExpresiones;
+            //     public static int contador_expresiones = 0;
+            //     // ::::::::::::::::::::::::::::     LEXEMAS       ::::::::::::::::::::::::::::
+            //     public static LinkedList<Lexema> listaLexemas = new LinkedList<Lexema>();
+            // //    public static LinkedList<Lexema> listaLexemas;    
+            //     public static int contador_lexemas = 0;
+            //-------------------------------------------   Operaciones  ---------------------------------------------
+            public static boolean esOperadorUnario(char x){
+                switch(x){
+                    case '+':
+                    case '?':
+                    case '*':
+                        return true;
                 }
-            } catch (Exception e2) {
-                e2.printStackTrace();
+                return false;
             }
-        }
-        //para compilar el archivo dot y obtener la imagen
-        try {
-            //dirección doonde se ecnuentra el compilador de graphviz
-            String dotPath = "C:\\Program Files\\Graphviz\\bin\\dot.exe";
-            //dirección del archivo dot
-            String fileInputPath = "C:\\Users\\G\\Desktop\\" + nombre + ".dot";
-            //dirección donde se creara la magen
-            String fileOutputPath = "C:\\Users\\G\\Desktop\\" +nombre+ ".jpg";
-            //tipo de conversón
-            String tParam = "-Tjpg";
-            String tOParam = "-o";
 
-            String[] cmd = new String[5];
-            cmd[0] = dotPath;
-            cmd[1] = tParam;
-            cmd[2] = fileInputPath;
-            cmd[3] = tOParam;
-            cmd[4] = fileOutputPath;
+            public static boolean esOperador(char x){
+                switch(x){
+                    case '+':
+                    case '?':
+                    case '*':
+                    case '|':
+                    case '.':
+                        return true;
+                }
+                return false;
+            }
+            //-------------------------------------------   Graficar arbol  ---------------------------------------------
+            public static void graficarArbol(Nodo act, String nombre){
+                FileWriter fichero = null;
+                PrintWriter pw = null;
+                try {
+                    fichero = new FileWriter("C:\\Users\\G\\Desktop\\" + nombre + ".dot");
+                    pw = new PrintWriter(fichero);
+                    pw.println("digraph G{");
+                    pw.println("rankdir=UD");
+                    pw.println("node[shape=box]");
+                    pw.println("concentrate=true");
+                    pw.println(act.getCodigoInterno());
+                    pw.println("}");
+                } catch (Exception e) {
+                    System.out.println("error, no se realizo el archivo");
+                } finally {
+                    try {
+                        if (null != fichero) {
+                            fichero.close();
+                        }
+                    } catch (Exception e2) {
+                        e2.printStackTrace();
+                    }
+                }
+                //para compilar el archivo dot y obtener la imagen
+                try {
+                    //dirección doonde se ecnuentra el compilador de graphviz
+                    String dotPath = "C:\\Program Files\\Graphviz\\bin\\dot.exe";
+                    //dirección del archivo dot
+                    String fileInputPath = "C:\\Users\\G\\Desktop\\" + nombre + ".dot";
+                    //dirección donde se creara la magen
+                    String fileOutputPath = "C:\\Users\\G\\Desktop\\" +nombre+ ".jpg";
+                    //tipo de conversón
+                    String tParam = "-Tjpg";
+                    String tOParam = "-o";
 
-            Runtime rt = Runtime.getRuntime();
+                    String[] cmd = new String[5];
+                    cmd[0] = dotPath;
+                    cmd[1] = tParam;
+                    cmd[2] = fileInputPath;
+                    cmd[3] = tOParam;
+                    cmd[4] = fileOutputPath;
 
-            rt.exec(cmd);
+                    Runtime rt = Runtime.getRuntime();
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        } finally {
-        }
-    }
+                    rt.exec(cmd);
 
-   //-----------------------------------------para errores sintacticos-------------------------------------------------------------------------------------------
-   // Metodo para errores sintacticos
-    public void syntax_error(Symbol s)
-    {
-        String lexema = s.value.toString();
-        int fila = s.right;
-        int columna = s.left;
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                } finally {
+                }
+            }
 
-        System.err.println("!!!!!!! Error Sintactico Recuperado !!!!!!!");
-        System.err.println("\t\tLexema: " + lexema);
-        System.err.println("\t\tFila: " + fila);
-        System.err.println("\t\tColumna: " + columna);
+        //-----------------------------------------para errores sintacticos-------------------------------------------------------------------------------------------
+        // Metodo para errores sintacticos
+            public void syntax_error(Symbol s)
+            {
+                String lexema = s.value.toString();
+                int fila = s.right;
+                int columna = s.left;
 
-        TError datos = new TError(lexema, fila, columna, "Error Sintactico", "Caracter no esperado.");
-        TablaES.add(datos);
-    }
-    // Metodo llamado, en caso no se puede recuperar del error.
-    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
-    {
-        String lexema = s.value.toString();
-        int fila = s.right;
-        int columna = s.left;
+                System.err.println("!!!!!!! Error Sintactico Recuperado !!!!!!!");
+                System.err.println("\t\tLexema: " + lexema);
+                System.err.println("\t\tFila: " + fila);
+                System.err.println("\t\tColumna: " + columna);
 
-        System.err.println("!!!!!!! Error Sintactico, MODO PANICO !!!!!!!");
-        System.err.println("\t\tLexema: " + lexema);
-        System.err.println("\t\tFila: " + fila);
-        System.err.println("\t\tColumna: " + columna);
+                TError datos = new TError(lexema, fila, columna, "Error Sintactico", "Caracter no esperado.");
+                TablaES.add(datos);
+            }
+            // Metodo llamado, en caso no se puede recuperar del error.
+            public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+            {
+                String lexema = s.value.toString();
+                int fila = s.right;
+                int columna = s.left;
 
-        TError datos = new TError(lexema, fila, columna, "Error Sintactico", "F. Caracter no esperado.");
-        TablaES.add(datos);
-    }
-    //-------------------------------------------------------------------------------------------------------------------------------------------
+                System.err.println("!!!!!!! Error Sintactico, MODO PANICO !!!!!!!");
+                System.err.println("\t\tLexema: " + lexema);
+                System.err.println("\t\tFila: " + fila);
+                System.err.println("\t\tColumna: " + columna);
 
+                TError datos = new TError(lexema, fila, columna, "Error Sintactico", "F. Caracter no esperado.");
+                TablaES.add(datos);
+            }
+            //-------------------------------------------------------------------------------------------------------------------------------------------
+        
 
 /** Cup generated class to encapsulate user supplied action code.*/
 @SuppressWarnings({"rawtypes", "unchecked", "unused"})
 class CUP$Parser$actions {
 
 
-    
-
+            
+        
   private final Parser parser;
 
   /** Constructor */
@@ -465,13 +490,13 @@ class CUP$Parser$actions {
 		int inicio_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object inicio_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                // Pantalla_principal.list_of_names += inicio_;
-                                // Nodo nuevo_nodo = new Nodo(null, null, "INICIO",);
-                                // nuevo_nodo.Hijos.add((Nodo) inicio_);
-                                parser.raiz = (Nodo) inicio_;
-                                // resultado = (String) inicio_;
-                                // graficarArbol((Nodo) inicio_, "testArbol");
-                            
+                                        // Pantalla_principal.list_of_names += inicio_;
+                                        // Nodo nuevo_nodo = new Nodo(null, null, "INICIO",);
+                                        // nuevo_nodo.Hijos.add((Nodo) inicio_);
+                                        // parser.raiz = (Nodo) inicio_;
+                                        // resultado = (String) inicio_;
+                                        // graficarArbol((Nodo) inicio_, "testArbol");
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("INICIO",0, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -484,11 +509,13 @@ class CUP$Parser$actions {
 		int estructura_cuerpo_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		Object estructura_cuerpo_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
-                                // Nodo nuevo_nodo = new Nodo("CUERPO");
-                                // nuevo_nodo.Hijos.add((Nodo) cuerpo_);
-                                // RESULT = nuevo_nodo;
-                                RESULT = estructura_cuerpo_;
-                            
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("CUERPO");
+                                            // nuevo_nodo.Hijos.add((Nodo) cuerpo_);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = estructura_cuerpo_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CUERPO",1, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -522,12 +549,14 @@ class CUP$Parser$actions {
 		int expresion_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-5)).right;
 		Object expresion_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-5)).value;
 		
-                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                // RESULT = nuevo_nodo;
-                                // RESULT = (Nodo) conjunto_;
-                                RESULT = expresion_;
-                            
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                            // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                            // RESULT = nuevo_nodo;
+                                            // RESULT = (Nodo) conjunto_;
+                                        // ==============================================
+                                        RESULT = expresion_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ESTRUCTURA_CUERPO",2, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -543,11 +572,13 @@ class CUP$Parser$actions {
 		int conjunto_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-5)).right;
 		Object conjunto_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-5)).value;
 		
-                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                // RESULT = nuevo_nodo;
-                                RESULT = expresion_;
-                            
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                            // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = expresion_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ESTRUCTURA_CUERPO",2, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -563,11 +594,13 @@ class CUP$Parser$actions {
 		int conjunto_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		Object conjunto_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
-                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                // RESULT = nuevo_nodo;
-                                RESULT = expresion_;
-                            
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                            // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = expresion_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ESTRUCTURA_CUERPO",2, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -583,11 +616,13 @@ class CUP$Parser$actions {
 		int conjunto_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object conjunto_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
-                                // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
-                                // RESULT = nuevo_nodo;
-                                RESULT = expresion_;
-                            
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("ESTRUCTURA_CUERPO");
+                                            // nuevo_nodo.Hijos.add((Nodo) es_cuerpo);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = expresion_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ESTRUCTURA_CUERPO",2, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -600,12 +635,14 @@ class CUP$Parser$actions {
 		int es_conj_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object es_conj_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                // Nodo nuevo_nodo = new Nodo("CONJUNTO");
-                                // nuevo_nodo.Hijos.add((Nodo) conjunto_);
-                                // nuevo_nodo.Hijos.add((Nodo) es_conj);
-                                // RESULT = nuevo_nodo;
-                                 RESULT = es_conj_;
-                            
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo("CONJUNTO");
+                                            // nuevo_nodo.Hijos.add((Nodo) conjunto_);
+                                            // nuevo_nodo.Hijos.add((Nodo) es_conj);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = es_conj_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CONJUNTO",4, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -618,12 +655,14 @@ class CUP$Parser$actions {
 		int es_conj_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object es_conj_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                // Nodo nuevo_nodo = new Nodo(null, null, "CONJUNTO", parser.contador);
-                                // parser.contador++;
-                                // nuevo_nodo.Hijos.add((Nodo) es_conj);
-                                // RESULT = nuevo_nodo;
-                                RESULT = es_conj_;
-                            
+                                        // ==============================================
+                                            // Nodo nuevo_nodo = new Nodo(null, null, "CONJUNTO", parser.contador);
+                                            // parser.contador++;
+                                            // nuevo_nodo.Hijos.add((Nodo) es_conj);
+                                            // RESULT = nuevo_nodo;
+                                        // ==============================================
+                                        RESULT = es_conj_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CONJUNTO",4, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -639,19 +678,20 @@ class CUP$Parser$actions {
 		int lista_conjuntos_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		Object lista_conjuntos_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
-                                // Nodo nuevo_identificador_conjunto = new Nodo(null, null, String.valueOf(identificador_arbol), parser.contador);
-                                // parser.contador++;
-                                // RESULT = nuevo_identificador_conjunto;
-                                
-                                // ********************     Obteniendo conjuntos    ********************
-                                StringBuilder temp_conj = new StringBuilder();
-                                Resultado res = (Resultado) lista_conjuntos_;
-                                temp_conj.append(res.getContenido());
-                                System.out.println("\nConjunto reconocido: " + temp_conj.toString() + "\n");
-                                Instancias.listaConjuntos.add(new Conjunto(Instancias.contador_conjuntos, identificador_conjunto, temp_conj.toString()));
-                                Instancias.contador_conjuntos++;
-                                // RESULT = res.getNodoTemporal();
-                            
+                                        // ==============================================
+                                            // Nodo nuevo_identificador_conjunto = new Nodo(null, null, String.valueOf(identificador_arbol), parser.contador);
+                                            // parser.contador++;
+                                            // RESULT = nuevo_identificador_conjunto;
+                                        
+                                        // ********************     Obteniendo conjuntos    ********************
+                                        StringBuilder temp_conj = new StringBuilder();
+                                        Resultado res = (Resultado) lista_conjuntos_;
+                                        temp_conj.append(res.getContenido());
+                                        System.out.println("\nConjunto reconocido: " + temp_conj.toString() + "\n");
+                                        Instancias.listaConjuntos.add(new Conjunto(Instancias.contador_conjuntos, identificador_conjunto, temp_conj.toString()));
+                                        Instancias.contador_conjuntos++;
+                                        // RESULT = res.getNodoTemporal();
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ESTRUCTURA_CONJUNTO",5, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -664,10 +704,10 @@ class CUP$Parser$actions {
 		int conjunto_coma_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object conjunto_coma_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                String content = (String) conjunto_coma_;
-                                Resultado res = new Resultado(null, content);
-                                RESULT = res;
-                            
+                                        String content = (String) conjunto_coma_;
+                                        Resultado res = new Resultado(null, content);
+                                        RESULT = res;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LISTA_CONJUNTOS",6, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -686,10 +726,10 @@ class CUP$Parser$actions {
 		int tipo_caracter_derright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object tipo_caracter_der = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                String content = tipo_caracter_izq + tilde_ + tipo_caracter_der;
-                                Resultado res = new Resultado(null, content);
-                                RESULT = res;
-                            
+                                        String content = tipo_caracter_izq + tilde_ + tipo_caracter_der;
+                                        Resultado res = new Resultado(null, content);
+                                        RESULT = res;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LISTA_CONJUNTOS",6, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -708,8 +748,8 @@ class CUP$Parser$actions {
 		int tipo_caracter_derright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object tipo_caracter_der = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = tipo_caracter_izq + coma_ + tipo_caracter_der;
-                            
+                                        RESULT = tipo_caracter_izq + coma_ + tipo_caracter_der;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CONJUNTO_COMA",8, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -722,8 +762,8 @@ class CUP$Parser$actions {
 		int tipo_caracter_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object tipo_caracter_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = tipo_caracter_;
-                            
+                                        RESULT = tipo_caracter_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CONJUNTO_COMA",8, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -736,8 +776,8 @@ class CUP$Parser$actions {
 		int admiracion_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String admiracion_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = admiracion_;
-                            
+                                        RESULT = admiracion_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -750,8 +790,8 @@ class CUP$Parser$actions {
 		int comillasDobles_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String comillasDobles_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = comillasDobles_;
-                            
+                                        RESULT = comillasDobles_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -764,8 +804,8 @@ class CUP$Parser$actions {
 		int numeral_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String numeral_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = numeral_;
-                            
+                                        RESULT = numeral_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -778,8 +818,8 @@ class CUP$Parser$actions {
 		int dolar_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String dolar_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = dolar_;
-                            
+                                        RESULT = dolar_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -792,8 +832,8 @@ class CUP$Parser$actions {
 		int porcentaje_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String porcentaje_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = porcentaje_;
-                            
+                                        RESULT = porcentaje_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -806,8 +846,8 @@ class CUP$Parser$actions {
 		int ampersand_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String ampersand_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = ampersand_;
-                            
+                                        RESULT = ampersand_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -820,8 +860,8 @@ class CUP$Parser$actions {
 		int comillaSimple_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String comillaSimple_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = comillaSimple_;
-                            
+                                        RESULT = comillaSimple_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -834,8 +874,8 @@ class CUP$Parser$actions {
 		int parentesisA_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String parentesisA_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = parentesisA_;
-                            
+                                        RESULT = parentesisA_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -848,8 +888,8 @@ class CUP$Parser$actions {
 		int parentesisC_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String parentesisC_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = parentesisC_;
-                            
+                                        RESULT = parentesisC_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -862,8 +902,8 @@ class CUP$Parser$actions {
 		int asterisco_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String asterisco_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = asterisco_;
-                            
+                                        RESULT = asterisco_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -876,8 +916,8 @@ class CUP$Parser$actions {
 		int mas_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String mas_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = mas_;
-                            
+                                        RESULT = mas_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -890,8 +930,8 @@ class CUP$Parser$actions {
 		int coma_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String coma_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = coma_;
-                            
+                                        RESULT = coma_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -904,8 +944,8 @@ class CUP$Parser$actions {
 		int guion_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String guion_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = guion_;
-                            
+                                        RESULT = guion_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -918,8 +958,8 @@ class CUP$Parser$actions {
 		int punto_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String punto_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = punto_;
-                            
+                                        RESULT = punto_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -932,8 +972,8 @@ class CUP$Parser$actions {
 		int diagonal_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String diagonal_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = diagonal_;
-                            
+                                        RESULT = diagonal_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -946,8 +986,8 @@ class CUP$Parser$actions {
 		int dosPuntos_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String dosPuntos_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = dosPuntos_;
-                            
+                                        RESULT = dosPuntos_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -960,8 +1000,8 @@ class CUP$Parser$actions {
 		int puntoComa_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String puntoComa_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = puntoComa_;
-                            
+                                        RESULT = puntoComa_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -974,8 +1014,8 @@ class CUP$Parser$actions {
 		int menorQue_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String menorQue_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = menorQue_;
-                            
+                                        RESULT = menorQue_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -988,8 +1028,8 @@ class CUP$Parser$actions {
 		int igual_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String igual_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = igual_;
-                            
+                                        RESULT = igual_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1002,8 +1042,8 @@ class CUP$Parser$actions {
 		int mayorQue_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String mayorQue_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = mayorQue_;
-                            
+                                        RESULT = mayorQue_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1016,8 +1056,8 @@ class CUP$Parser$actions {
 		int interrogacion_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String interrogacion_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = interrogacion_;
-                            
+                                        RESULT = interrogacion_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1030,8 +1070,8 @@ class CUP$Parser$actions {
 		int arroba_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String arroba_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = arroba_;
-                            
+                                        RESULT = arroba_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1044,8 +1084,8 @@ class CUP$Parser$actions {
 		int corcheteA_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String corcheteA_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = corcheteA_;
-                            
+                                        RESULT = corcheteA_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1058,8 +1098,8 @@ class CUP$Parser$actions {
 		int diagonalInversa_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String diagonalInversa_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = diagonalInversa_;
-                            
+                                        RESULT = diagonalInversa_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1072,8 +1112,8 @@ class CUP$Parser$actions {
 		int corcheteC_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String corcheteC_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = corcheteC_;
-                            
+                                        RESULT = corcheteC_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1086,8 +1126,8 @@ class CUP$Parser$actions {
 		int acentoCircunflejo_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String acentoCircunflejo_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = acentoCircunflejo_;
-                            
+                                        RESULT = acentoCircunflejo_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1100,8 +1140,8 @@ class CUP$Parser$actions {
 		int guionBajo_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String guionBajo_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = guionBajo_;
-                            
+                                        RESULT = guionBajo_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1114,8 +1154,8 @@ class CUP$Parser$actions {
 		int acentoGrave_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String acentoGrave_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = acentoGrave_;
-                            
+                                        RESULT = acentoGrave_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1128,8 +1168,8 @@ class CUP$Parser$actions {
 		int llaveA_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String llaveA_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = llaveA_;
-                            
+                                        RESULT = llaveA_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1142,8 +1182,8 @@ class CUP$Parser$actions {
 		int orBooleana_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String orBooleana_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = orBooleana_;
-                            
+                                        RESULT = orBooleana_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1156,8 +1196,8 @@ class CUP$Parser$actions {
 		int llaveC_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String llaveC_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = llaveC_;
-                            
+                                        RESULT = llaveC_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES",3, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1170,8 +1210,8 @@ class CUP$Parser$actions {
 		int comillasDoblesEspecial_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object comillasDoblesEspecial_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = comillasDoblesEspecial_;
-                            
+                                        RESULT = comillasDoblesEspecial_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES_ESPECIALES",17, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1184,8 +1224,8 @@ class CUP$Parser$actions {
 		int comillaSimpleEspecial_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object comillaSimpleEspecial_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = comillaSimpleEspecial_;
-                            
+                                        RESULT = comillaSimpleEspecial_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES_ESPECIALES",17, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1198,8 +1238,8 @@ class CUP$Parser$actions {
 		int saltoLineaEspecial_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object saltoLineaEspecial_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = saltoLineaEspecial_;
-                            
+                                        RESULT = saltoLineaEspecial_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("CARACTERES_ESPECIALES",17, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1212,8 +1252,8 @@ class CUP$Parser$actions {
 		int letras_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String letras_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = letras_;
-                            
+                                    RESULT = letras_;
+                                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("TIPO_CARACTER",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1226,8 +1266,8 @@ class CUP$Parser$actions {
 		int numero_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String numero_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = numero_;
-                            
+                                    RESULT = numero_;
+                                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("TIPO_CARACTER",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1240,8 +1280,8 @@ class CUP$Parser$actions {
 		int caracteres_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object caracteres_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = caracteres_;
-                            
+                                    RESULT = caracteres_;
+                                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("TIPO_CARACTER",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1254,8 +1294,8 @@ class CUP$Parser$actions {
 		int caracteresEspeciales_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object caracteresEspeciales_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = caracteresEspeciales_;
-                            
+                                    RESULT = caracteresEspeciales_;
+                                
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("TIPO_CARACTER",7, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1271,11 +1311,14 @@ class CUP$Parser$actions {
 		int es_expresion_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object es_expresion_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                Nodo nuevasExpresiones = new Nodo((Nodo) exp_, (Nodo) es_expresion_, "LIST_EXP", parser.contador);
-                                parser.contador++;
-                                RESULT = nuevasExpresiones;
-                                // RESULT = (String) exp_ + (String) es_expresion_;
-                            
+                                        // ==============================================
+                                            // Nodo nuevasExpresiones = new Nodo((Nodo) exp_, (Nodo) es_expresion_, "LIST_EXP", parser.contador);
+                                            // parser.contador++;
+                                            // RESULT = nuevasExpresiones;
+                                        // ==============================================
+
+                                        RESULT = (String) exp_ + (String) es_expresion_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("EXPRESION",9, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1288,8 +1331,11 @@ class CUP$Parser$actions {
 		int es_expresion_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object es_expresion_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = (Nodo) es_expresion_;
-                            
+                                        // RESULT = (Nodo) es_expresion_;
+                                        // ==============================================
+
+                                        RESULT = (String) es_expresion_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("EXPRESION",9, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1305,21 +1351,123 @@ class CUP$Parser$actions {
 		int lista_expresiones_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		Object lista_expresiones_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
-                                // ********************     Obteniendo expresiones    ********************
-                                StringBuilder temp_exp = new StringBuilder();
-                                Resultado res = (Resultado) lista_expresiones_;
-                                String content = res.getContenido();
-                                // String content = (String) lista_expresiones_;
-                                System.out.println("[GRAM] REC LIST_EXP: " + content);
-                                // temp_exp.append((String) lista_expresiones_);
-                                temp_exp.append((String) content);
-                                System.out.println("\nExpresion reconocida: " + temp_exp.toString() + "\n");
-                                Instancias.listaExpresiones.add(new Expresion(Instancias.contador_expresiones, identificador_expresion, temp_exp.toString()));
-                                Instancias.contador_expresiones++;
-                                Nodo nuevaListaExpresiones = res.getNodoTemporal();
-                                RESULT = nuevaListaExpresiones;
-                                // RESULT = lista_expresiones_;
-                            
+                                        // ********************     Obteniendo expresiones    ********************
+                                        // ==============================================
+                                            // Resultado res = (Resultado) lista_expresiones_;
+                                            // Nodo nuevaListaExpresiones = res.getNodoTemporal();
+                                            // String content = res.getContenido();
+                                            // System.out.println("[GRAM] (sube) LIST_EXP: " + content);
+                                        
+                                        // ==============================================
+                                        // Ingresando valores en pila1
+                                            int contArbol = 0;
+                                            Stack<String> pilaTemp = new Stack<String>();
+                                            Instancias.listaExpresionesPila.add(parser.pilaValExps);
+                                            for (ValorExpresiones valExpTemp : parser.pilaValExps) {
+                                                pilaTemp.push(valExpTemp.getValor());
+                                                valExpTemp.mostrar();
+                                                Instancias.arbol_binario_expresiones.insertar(valExpTemp);
+                                                // contArbol++;
+                                            }
+                                        // *************** Insertando en abb ***************
+                                            // Copiando en stack temporal
+                                            Stack<ValorExpresiones> pilaValExpsCOPIA = new Stack<ValorExpresiones>();
+                                            // pilaValExpsCOPIA.addAll(pilaValExps);
+                                            
+                                            // pilaTemp.addAll(pilaValExps.getValor());
+                                            System.out.println("\nPila temporal, antes: ");
+                                            for(String val : pilaTemp){
+                                                System.out.print(val);
+                                            }
+                                            System.out.println("\n");
+
+                                            int tam_pila = parser.pilaValExps.size();
+                                            for (int i = tam_pila - 1; i >= 0; i--) {
+                                                String tipo = parser.pilaValExps.get(i).getTipo();
+                                                
+                                                if(tipo == "OP"){
+
+                                                    char tipo_c = parser.pilaValExps.get(i).getValor().charAt(0);
+                                                    if(esOperadorUnario(tipo_c)){
+                                                        System.out.println("Tipo OP unaria: " + tipo_c);
+                                                        // String op_unario = valExpTemp.getValor();
+                                                        ValorExpresiones op_unario = parser.pilaValExps.get(i);
+                                                        System.out.println("Insertando OP UN: " + op_unario.getValor());
+                                                        pilaValExpsCOPIA.push(op_unario);
+                                                        ValorExpresiones val1 = pilaValExpsCOPIA.get(1);
+                                                        if(val1.getTipo() != "OP"){
+                                                            pilaValExpsCOPIA.pop();
+                                                            ValorExpresiones val1_ = pilaValExpsCOPIA.pop();
+                                                            System.out.println("Insertando VAL UN: " + val1_.getValor());
+                                                            pilaValExpsCOPIA.push(op_unario);
+                                                            pilaValExpsCOPIA.push(val1_);
+                                                            // pilaValExpsCOPIA.push(val1_);
+                                                        }
+                                                                                                              
+                                                        
+                                                    } else {
+                                                        System.out.println("Tipo OP dual: " + tipo_c);
+                                                        ValorExpresiones op = parser.pilaValExps.get(i);
+                                                        
+
+                                                        ValorExpresiones val = pilaValExpsCOPIA.get(0);
+                                                        System.out.println("val: " + val.getTipo());
+                                                        if(val.getTipo() != "OP"){
+                                                            ValorExpresiones val_ = pilaValExpsCOPIA.pop();
+                                                            System.out.println("Insertando VAL DU: " + val_.getValor());
+                                                            pilaValExpsCOPIA.push(val_);
+                                                            System.out.println("Insertando OP DU: " + op.getValor());
+                                                            pilaValExpsCOPIA.push(op);
+                                                            ValorExpresiones val1 = pilaValExpsCOPIA.get(1);
+                                                            System.out.println("val1: " + val1.getTipo());
+                                                            if(val1.getTipo() != "OP"){
+                                                                pilaValExpsCOPIA.pop();
+                                                                ValorExpresiones val1_ = pilaValExpsCOPIA.pop();
+                                                                System.out.println("Insertando VAL 1 DU: " + val1_.getValor());
+                                                                pilaValExpsCOPIA.push(op);
+                                                                pilaValExpsCOPIA.push(val1_);
+                                                            }
+                                                        }
+                                                        
+
+                                                        // pilaValExpsCOPIA.push(val);
+                                                        // pilaValExpsCOPIA.push(op);
+                                                        // pilaValExpsCOPIA.push(val1);
+                                                        
+                                                    }
+                                                } else {
+                                                    
+                                                    ValorExpresiones val = parser.pilaValExps.get(i);
+                                                    System.out.println("VAL OUT: " + val.getValor());
+                                                    pilaValExpsCOPIA.push(val);
+                                                }
+                                                
+                                                // Instancias.arbol_binario_expresiones.
+                                            }
+
+                                            // System.out.println("\nPila temporal: ");
+                                            // for(String val : pilaTemp){
+                                            //     System.out.print(val);
+                                            // }
+                                            System.out.println("\nPila despues xdd: ");
+                                            for (ValorExpresiones valExpTemp : pilaValExpsCOPIA) {
+                                                System.out.print(valExpTemp.getValor());
+                                            }
+                                            System.out.println("\n");
+
+                                            parser.pilaValExps.clear();
+                                            parser.contador_val_expresiones = 0;
+                                        // ==============================================
+
+                                        String content = (String) lista_expresiones_;
+                                        StringBuilder temp_exp = new StringBuilder();
+                                        temp_exp.append((String) content);
+                                        System.out.println("\nExpresion reconocida: " + temp_exp.toString() + "\n");
+                                        Instancias.listaExpresiones.add(new Expresion(Instancias.contador_expresiones, identificador_expresion, temp_exp.toString()));
+                                        Instancias.contador_expresiones++;
+                                        // RESULT = nuevaListaExpresiones;
+                                        RESULT = lista_expresiones_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ESTRUCTURA_EXPRESION",10, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1338,30 +1486,33 @@ class CUP$Parser$actions {
 		int valor_expresion_derright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object valor_expresion_der = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                // Recuperando valores
-                                Resultado res_lista_exp_ = (Resultado) lista_exp_;
-                                Resultado res_tipo_op = (Resultado) tipo_operacion_;
-                                Resultado res_valor_exp_der = (Resultado) valor_expresion_der;
-                                String content_tipo_op = res_tipo_op.getContenido();
-                                String content_valor_lista_exp_ = res_lista_exp_.getContenido();
-                                String content_valor_exp_der = res_valor_exp_der.getContenido();
-                                String content = content_valor_lista_exp_ + content_tipo_op + content_valor_exp_der;
-                                // Decidiendo
-                                Nodo nuevoExpresion = new Nodo(res_lista_exp_.getNodoTemporal(), res_tipo_op.getNodoTemporal(), "LIST_TOP", parser.contador);
-                                parser.contador++;
-                                Nodo nuevaOperacion = new Nodo(nuevoExpresion, res_valor_exp_der.getNodoTemporal(), "LIST_TOP_VALEXP", parser.contador);
-                                parser.contador++;
-                                // Resultado res_lista_exp_ = (Resultado) lista_exp_;
-                                // System.out.println("contttt: \t\t" + res_lista_exp_.getContenido());
-                                // String content = res_lista_exp_.getContenido() + (String) tipo_operacion_ + (String) valor_expresion_der;
-                                // String content = (String) lista_exp_ + (String) tipo_operacion_ + (String) valor_expresion_der;
-                                Resultado res = new Resultado(nuevaOperacion, content);
-                                // String content = res.getContenido();
-                                System.out.println("[GRAM] REC LIST_TOP_VALEXP: " + content);
-                                RESULT = res;
-                                // String content = (String) lista_exp_ + (String) tipo_operacion_ + (String) valor_expresion_der;
-                                // RESULT = content;
-                            
+                                        // ==============================================
+                                            // Recuperando valores
+                                            // Resultado res_lista_exp_ = (Resultado) lista_exp_;
+                                            // Resultado res_tipo_op = (Resultado) tipo_operacion_;
+                                            // Resultado res_valor_exp_der = (Resultado) valor_expresion_der;
+                                            // String content_tipo_op = res_tipo_op.getContenido();
+                                            // String content_valor_lista_exp_ = res_lista_exp_.getContenido();
+                                            // String content_valor_exp_der = res_valor_exp_der.getContenido();
+                                            // String content = content_valor_lista_exp_ + content_tipo_op + content_valor_exp_der;
+                                            // // Decidiendo
+                                            // Nodo nuevoExpresion = new Nodo(res_lista_exp_.getNodoTemporal(), res_tipo_op.getNodoTemporal(), "LIST_TOP", parser.contador);
+                                            // parser.contador++;
+                                            // Nodo nuevaOperacion = new Nodo(nuevoExpresion, res_valor_exp_der.getNodoTemporal(), "LIST_TOP_VALEXP", parser.contador);
+                                            // parser.contador++;
+                                            // // Resultado res_lista_exp_ = (Resultado) lista_exp_;
+                                            // // System.out.println("contttt: \t\t" + res_lista_exp_.getContenido());
+                                            // // String content = res_lista_exp_.getContenido() + (String) tipo_operacion_ + (String) valor_expresion_der;
+                                            // // String content = (String) lista_exp_ + (String) tipo_operacion_ + (String) valor_expresion_der;
+                                            // Resultado res = new Resultado(nuevaOperacion, content);
+                                            // // String content = res.getContenido();
+                                            // System.out.println("[GRAM] (padre) LIST_TOP_VALEXP: " + content);
+                                            // RESULT = res;
+                                        // ==============================================
+
+                                        String content = (String) lista_exp_ + (String) tipo_operacion_ + (String) valor_expresion_der;
+                                        RESULT = content;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LISTA_EXPRESIONES",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1377,20 +1528,23 @@ class CUP$Parser$actions {
 		int valor_expresion_derright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object valor_expresion_der = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                Resultado res_tipo_op = (Resultado) tipo_operacion_;
-                                Resultado res_valor_exp_der = (Resultado) valor_expresion_der;
-                                String content_tipo_op = res_tipo_op.getContenido();
-                                String content_valor_exp_der = res_valor_exp_der.getContenido();
-                                String content = content_tipo_op + content_valor_exp_der;
-                                // Decidiendo
-                                Nodo nuevoExpresion = new Nodo(res_tipo_op.getNodoTemporal(), res_valor_exp_der.getNodoTemporal(), "TOP_VALEXP", parser.contador);
-                                parser.contador++; 
-                                Resultado res = new Resultado(nuevoExpresion, content);
-                                System.out.println("[GRAM] REC TOP_VALEXP: " + content);
-                                RESULT = res;
-                                // String content = (String) tipo_operacion_ + (String) valor_expresion_der;
-                                // RESULT = content;
-                            
+                                        // ==============================================
+                                            // Resultado res_tipo_op = (Resultado) tipo_operacion_;
+                                            // Resultado res_valor_exp_der = (Resultado) valor_expresion_der;
+                                            // String content_tipo_op = res_tipo_op.getContenido();
+                                            // String content_valor_exp_der = res_valor_exp_der.getContenido();
+                                            // String content = content_tipo_op + content_valor_exp_der;
+                                            // // Decidiendo
+                                            // Nodo nuevoExpresion = new Nodo(res_tipo_op.getNodoTemporal(), res_valor_exp_der.getNodoTemporal(), "TOP_VALEXP", parser.contador);
+                                            // parser.contador++; 
+                                            // Resultado res = new Resultado(nuevoExpresion, content);
+                                            // System.out.println("[GRAM] (padre) TOP_VALEXP: " + content);
+                                            // RESULT = res;
+                                        // ==============================================
+
+                                        String content = (String) tipo_operacion_ + (String) valor_expresion_der;
+                                        RESULT = content;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LISTA_EXPRESIONES",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1409,22 +1563,32 @@ class CUP$Parser$actions {
 		int esp_char_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object esp_char_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_id + content_valor_char + content_esp_char;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_valor_id.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_esp_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_id + content_valor_char + co ntent_esp_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ID_CHAR_ESP: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_valor_id.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_esp_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) valor_id_ + (String) valor_char_ + (String) esp_char_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_id_ + (String) valor_char_ + (String) esp_char_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1443,22 +1607,32 @@ class CUP$Parser$actions {
 		int esp_char_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object esp_char_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_char + content_valor_id + content_esp_char;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_valor_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_esp_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_char + content_valor_id + content_esp_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_CHAR_ID_ESP: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_valor_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_esp_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) valor_char_ + (String) valor_id_ + (String) esp_char_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_char_ + (String) valor_id_ + (String) esp_char_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1477,22 +1651,32 @@ class CUP$Parser$actions {
 		int valor_char_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object valor_char_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_esp_char + content_valor_id + content_valor_char;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_esp_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ESP_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_char.getNodoTemporal(), "ESP_CHAR_ID", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_esp_char + content_valor_id + content_valor_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ESP_ID_CHAR: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_esp_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ESP_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_char.getNodoTemporal(), "ESP_CHAR_ID", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) esp_char_ + (String) valor_id_ + (String) valor_char_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) esp_char_ + (String) valor_id_ + (String) valor_char_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1511,22 +1695,32 @@ class CUP$Parser$actions {
 		int valor_id_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object valor_id_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_esp_char + content_valor_char + content_valor_id;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_esp_char.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ESP_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_id.getNodoTemporal(), "ESP_CHAR_ID", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_esp_char + content_valor_char + content_valor_id;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ESP_CHAR_ID: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_esp_char.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ESP_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_id.getNodoTemporal(), "ESP_CHAR_ID", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) esp_char_ + (String) valor_char_ + (String) valor_id_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) esp_char_ + (String) valor_char_ + (String) valor_id_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1545,22 +1739,32 @@ class CUP$Parser$actions {
 		int valor_char_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object valor_char_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_id + esp_char_ + content_valor_char;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_valor_id.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_id + esp_char_ + content_valor_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ID_ESP_CHAR: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_valor_id.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_char.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) valor_id_ + (String) esp_char_ + (String) valor_char_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_id_ + (String) esp_char_ + (String) valor_char_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1579,22 +1783,32 @@ class CUP$Parser$actions {
 		int valor_id_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object valor_id_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_char + content_esp_char + content_valor_id;
-                                    Nodo nuevoValorExpresionT = new Nodo(res_valor_char.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_id.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_char + content_esp_char + content_valor_id;
+                                                // System.out.println("[GRAM] (padre) VALEXP_CHAR_ESP_ID: " + content);
+                                                // Nodo nuevoValorExpresionT = new Nodo(res_valor_char.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Nodo nuevoValorExpresion = new Nodo(nuevoValorExpresionT, res_valor_id.getNodoTemporal(), "ID_CHAR_ESP", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) valor_char_ + (String) esp_char_ + (String) valor_id_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_char_ + (String) esp_char_ + (String) valor_id_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1610,20 +1824,28 @@ class CUP$Parser$actions {
 		int esp_char_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object esp_char_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    // Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    // String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_id + content_esp_char;
-                                    Nodo nuevoValorExpresion = new Nodo(res_valor_id.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_id + content_esp_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ID_ESP: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_valor_id.getNodoTemporal(), res_esp_char.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) valor_id_ + (String) esp_char_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;                                            
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_id_ + (String) esp_char_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1639,20 +1861,28 @@ class CUP$Parser$actions {
 		int valor_id_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object valor_id_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    // Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    // String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_esp_char + content_valor_id;
-                                    Nodo nuevoValorExpresion = new Nodo(res_esp_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ESP_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_esp_char + content_valor_id;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ESP_ID: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_esp_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "ESP_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) esp_char_ + (String) valor_id_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) esp_char_ + (String) valor_id_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1668,20 +1898,28 @@ class CUP$Parser$actions {
 		int esp_char_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object esp_char_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    // Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    // String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_char + content_esp_char;
-                                    Nodo nuevoValorExpresion = new Nodo(res_valor_char.getNodoTemporal(), res_esp_char.getNodoTemporal(), "CHAR_ESP", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_char + content_esp_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ESP_CHAR: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_valor_char.getNodoTemporal(), res_esp_char.getNodoTemporal(), "CHAR_ESP", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) valor_char_ + (String) esp_char_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_char_ + (String) esp_char_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1697,21 +1935,29 @@ class CUP$Parser$actions {
 		int valor_char_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object valor_char_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    // Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_esp_char = (Resultado) esp_char_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    
-                                    // String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_esp_char + content_valor_char;
-                                    Nodo nuevoValorExpresion = new Nodo(res_esp_char.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ESP_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                
+                                                // // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_esp_char + content_valor_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_CHAR_ESP: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_esp_char.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ESP_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) esp_char_ + (String) valor_char_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) esp_char_ + (String) valor_char_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1727,20 +1973,28 @@ class CUP$Parser$actions {
 		int valor_char_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object valor_char_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    // Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    // String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_id + content_valor_char;
-                                    Nodo nuevoValorExpresion = new Nodo(res_valor_id.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ID_CHAR", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_id + content_valor_char;
+                                                // System.out.println("[GRAM] (padre) VALEXP_ID_CHAR: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_valor_id.getNodoTemporal(), res_valor_char.getNodoTemporal(), "ID_CHAR", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) valor_id_ + (String) valor_char_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_id_ + (String) valor_char_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1756,21 +2010,29 @@ class CUP$Parser$actions {
 		int valor_id_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object valor_id_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res_valor_char = (Resultado) valor_char_;
-                                    Resultado res_valor_id = (Resultado) valor_id_;
-                                    
-                                    // Resultado res_esp_char = (Resultado) esp_char_;
-                                    String content_valor_id = res_valor_id.getContenido();
-                                    String content_valor_char = res_valor_char.getContenido();
-                                    // String content_esp_char = res_esp_char.getContenido();
-                                    String content = content_valor_char + content_valor_id;
-                                    Nodo nuevoValorExpresion = new Nodo(res_valor_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "CHAR_ID", parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoValorExpresion, content);
+                                            // ==============================================
+                                                // Resultado res_valor_char = (Resultado) valor_char_;
+                                                // Resultado res_valor_id = (Resultado) valor_id_;
+                                                
+                                                // // Resultado res_esp_char = (Resultado) esp_char_;
+                                                // String content_valor_id = res_valor_id.getContenido();
+                                                // String content_valor_char = res_valor_char.getContenido();
+                                                // // String content_esp_char = res_esp_char.getContenido();
+                                                // String content = content_valor_char + content_valor_id;
+                                                // System.out.println("[GRAM] (padre) VALEXP_CHAR_ID: " + content);
+                                                // Nodo nuevoValorExpresion = new Nodo(res_valor_char.getNodoTemporal(), res_valor_id.getNodoTemporal(), "CHAR_ID", parser.contador);
+                                                // parser.contador++;
+                                                // Resultado res = new Resultado(nuevoValorExpresion, content);
 
-                                    RESULT = res;
-                                    // RESULT = (String) valor_char_ + (String) valor_id_;
-                                
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_char_ + (String) valor_id_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1783,13 +2045,18 @@ class CUP$Parser$actions {
 		int valor_id_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object valor_id_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res = (Resultado) valor_id_;
-                                    String content = res.getContenido();
-                                    System.out.println("[GRAM] REC VAL_EXP_VAL_ID: " + content);
-                                    RESULT = res;
-                                    // RESULT = valor_id_ + identificador_;
-                                    // RESULT = (String) valor_id_;
-                                
+                                            // ==============================================
+                                                // Resultado res = (Resultado) valor_id_;
+                                                // String content = res.getContenido();
+                                                // System.out.println("[GRAM] (sube) VALEXP_ID: " + content);
+                                                // RESULT = res;
+                                                // RESULT = valor_id_ + identificador_;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_id_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1798,16 +2065,21 @@ class CUP$Parser$actions {
           case 72: // VALOR_EXPRESION ::= VALOR_CHAR 
             {
               Object RESULT =null;
-		int val_char_left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
-		int val_char_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
-		Object val_char_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		int valor_char_left = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int valor_char_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Object valor_char_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Resultado res = (Resultado) val_char_;
-                                    String content = res.getContenido();
-                                    System.out.println("[GRAM] REC VAL_EXP_VAL_CHAR: " + content);
-                                    RESULT = res;
-                                    // RESULT = (String) val_char_;
-                                
+                                            // ==============================================
+                                                // Resultado res = (Resultado) val_char_;
+                                                // String content = res.getContenido();
+                                                // System.out.println("[GRAM] (sube) VALEXP_CHAR: " + content);
+                                                // RESULT = res;
+                                            // ==============================================
+                                            // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                            // parser.contador_val_expresiones++;
+
+                                            RESULT = (String) valor_char_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1820,12 +2092,18 @@ class CUP$Parser$actions {
 		int esp_char_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object esp_char_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                    Nodo nuevoCaracterEsp = new Nodo(null, null, (String) esp_char_, parser.contador);
-                                    parser.contador++;
-                                    Resultado res = new Resultado(nuevoCaracterEsp, (String) esp_char_);
-                                    RESULT = res;
-                                    // RESULT = (String) esp_char_;
-                                
+                                            // ==============================================
+                                                // Nodo nuevoCaracterEsp = new Nodo(null, null, (String) esp_char_, parser.contador);
+                                                // parser.contador++;
+                                                // System.out.println("[GRAM] (hoja) VALEXP_ESP: " + esp_char_);
+                                                // Resultado res = new Resultado(nuevoCaracterEsp, (String) esp_char_);
+                                                // RESULT = res;
+                                            // ==============================================
+                                            parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) esp_char_, "ESP"));
+                                            parser.contador_val_expresiones++;
+
+                                            RESULT = (String) esp_char_;
+                                        
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_EXPRESION",14, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1841,18 +2119,25 @@ class CUP$Parser$actions {
 		int identificador_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String identificador_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                Nodo nuevoValorID = new Nodo(null, null, (String) valor_id_, parser.contador);
-                                parser.contador++;
-                                Nodo nuevoID = new Nodo(null, null, identificador_, parser.contador);
-                                parser.contador++;
-                                Nodo NuevoNodo = new Nodo(nuevoValorID, nuevoID, "IDS", parser.contador);
-                                parser.contador++;
-                                String content = valor_id_ + identificador_;
-                                System.out.println("[GRAM] REC VAL_ID: " + content);
-                                Resultado res = new Resultado(NuevoNodo, content);
-                                RESULT = res;
-                                // RESULT = (String) valor_id_ + (String) identificador_;
-                            
+                                        // ==============================================
+                                            // Nodo nuevoValorID = new Nodo(null, null, (String) valor_id_, parser.contador);
+                                            // parser.contador++;
+                                            // Nodo nuevoID = new Nodo(null, null, identificador_, parser.contador);
+                                            // parser.contador++;
+                                            // Nodo NuevoNodo = new Nodo(nuevoValorID, nuevoID, "IDS", parser.contador);
+                                            // parser.contador++;
+                                            // String content = (String) valor_id_ + identificador_;
+                                            // System.out.println("[GRAM] (padre) VAL_ID: " + content);
+                                            // Resultado res = new Resultado(NuevoNodo, content);
+                                            // RESULT = res;
+                                        // ==============================================
+                                        // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_id_, "ID"));
+                                        // parser.contador_val_expresiones++;
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, identificador_, "ID"));
+                                        parser.contador_val_expresiones++;
+
+                                        RESULT = (String) valor_id_ + (String) identificador_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_ID",15, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1865,13 +2150,18 @@ class CUP$Parser$actions {
 		int identificador_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String identificador_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                Nodo NuevoNodo = new Nodo(null, null, identificador_, parser.contador);
-                                parser.contador++;
-                                System.out.println("[GRAM] REC VAL_ID: " + identificador_);
-                                Resultado res = new Resultado(NuevoNodo, identificador_);
-                                RESULT = res;
-                                // RESULT = (String) identificador_;
-                            
+                                        // ==============================================
+                                            // Nodo NuevoNodo = new Nodo(null, null, identificador_, parser.contador);
+                                            // parser.contador++;
+                                            // System.out.println("[GRAM] (hoja) VAL_ID: " + identificador_);
+                                            // Resultado res = new Resultado(NuevoNodo, identificador_);
+                                            // RESULT = res;
+                                        // ==============================================
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, identificador_, "ID"));
+                                        parser.contador_val_expresiones++;
+
+                                        RESULT = (String) identificador_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_ID",15, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1887,18 +2177,25 @@ class CUP$Parser$actions {
 		int cadena_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String cadena_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                Nodo nuevoValorChar = new Nodo(null, null, (String) valor_char_, parser.contador);
-                                parser.contador++;
-                                Nodo nuevoCadena = new Nodo(null, null, cadena_, parser.contador);
-                                parser.contador++;
-                                Nodo NuevoNodo = new Nodo(nuevoValorChar, nuevoCadena, "CHARS", parser.contador);
-                                parser.contador++;
-                                String content = valor_char_ + cadena_;
-                                System.out.println("[GRAM] REC VAL_CHAR: " + content);
-                                Resultado res = new Resultado(NuevoNodo, content);
-                                RESULT = res;
-                                // RESULT = (String) valor_char_ + cadena_;
-                            
+                                        // ==============================================
+                                            // Nodo nuevoValorChar = new Nodo(null, null, (String) valor_char_, parser.contador);
+                                            // parser.contador++;
+                                            // Nodo nuevoCadena = new Nodo(null, null, cadena_, parser.contador);
+                                            // parser.contador++;
+                                            // Nodo NuevoNodo = new Nodo(nuevoValorChar, nuevoCadena, "CHARS", parser.contador);
+                                            // parser.contador++;
+                                            // String content = (String) valor_char_ + cadena_;
+                                            // System.out.println("[GRAM] (padre) VAL_CHAR: " + content);
+                                            // Resultado res = new Resultado(NuevoNodo, content);
+                                            // RESULT = res;
+                                        // ==============================================
+                                        // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) valor_char_, "CHAR"));
+                                        // parser.contador_val_expresiones++;
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, cadena_, "CHAR"));
+                                        parser.contador_val_expresiones++;
+                                        
+                                        RESULT = (String) valor_char_ + cadena_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_CHAR",16, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1911,13 +2208,18 @@ class CUP$Parser$actions {
 		int cadena_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String cadena_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                Nodo NuevoNodo = new Nodo(null, null, cadena_, parser.contador);
-                                parser.contador++;
-                                System.out.println("[GRAM] REC VAL_CHAR: " + cadena_);
-                                Resultado res = new Resultado(NuevoNodo, cadena_);
-                                RESULT = res;
-                                // RESULT = cadena_;
-                            
+                                    // ==============================================
+                                        // Nodo NuevoNodo = new Nodo(null, null, cadena_, parser.contador);
+                                        // parser.contador++;
+                                        // System.out.println("[GRAM] (hoja) VAL_CHAR: " + cadena_);
+                                        // Resultado res = new Resultado(NuevoNodo, cadena_);
+                                        // RESULT = res;
+                                    // ==============================================
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, cadena_, "CHAR"));
+                                        parser.contador_val_expresiones++;
+
+                                        RESULT = cadena_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("VALOR_CHAR",16, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1933,18 +2235,25 @@ class CUP$Parser$actions {
 		int operador_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object operador_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                Nodo nuevoTipoOp = new Nodo(null, null, (String) tipo_operacion_, parser.contador);
-                                parser.contador++;
-                                Nodo nuevoOperador = new Nodo(null, null, (String) operador_, parser.contador);
-                                parser.contador++;
-                                Nodo NuevoNodo = new Nodo( nuevoTipoOp, nuevoOperador, "OPS", parser.contador);
-                                parser.contador++;
-                                String content =  (String) tipo_operacion_ + (String) operador_;
-                                System.out.println("[GRAM] REC TIPO_OP: " + content);
-                                Resultado res = new Resultado(NuevoNodo, content);
-                                RESULT = res;
-                                // RESULT = (String) tipo_operacion_ + (String) operador_;
-                            
+                                    // ==============================================
+                                        // Nodo nuevoTipoOp = new Nodo(null, null, (String) tipo_operacion_, parser.contador);
+                                        // parser.contador++;
+                                        // Nodo nuevoOperador = new Nodo(null, null, (String) operador_, parser.contador);
+                                        // parser.contador++;
+                                        // Nodo NuevoNodo = new Nodo( nuevoTipoOp, nuevoOperador, "OPS", parser.contador);
+                                        // parser.contador++;
+                                        // String content =  (String) tipo_operacion_ + (String) operador_;
+                                        // System.out.println("[GRAM] (padre) TIPO_OP: " + content);
+                                        // Resultado res = new Resultado(NuevoNodo, content);
+                                        // RESULT = res;
+                                    // ==============================================
+                                        // parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) tipo_operacion_, "OP"));
+                                        // parser.contador_val_expresiones++;
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) operador_, "OP"));
+                                        parser.contador_val_expresiones++;
+
+                                        RESULT = (String) tipo_operacion_ + (String) operador_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("TIPO_OPERACION",12, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1957,13 +2266,18 @@ class CUP$Parser$actions {
 		int operador_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		Object operador_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                Nodo NuevoNodo = new Nodo(null, null, (String) operador_, parser.contador);
-                                parser.contador++;
-                                System.out.println("[GRAM] REC TIPO_OP: " + (String) operador_);
-                                Resultado res = new Resultado(NuevoNodo, (String) operador_);
-                                RESULT = res;
-                                // RESULT = (String) operador_;
-                            
+                                    // ==============================================
+                                        // Nodo NuevoNodo = new Nodo(null, null, (String) operador_, parser.contador);
+                                        // parser.contador++;
+                                        // System.out.println("[GRAM] (hoja) TIPO_OP: " + (String) operador_);
+                                        // Resultado res = new Resultado(NuevoNodo, (String) operador_);
+                                        // RESULT = res;
+                                    // ==============================================
+                                        parser.pilaValExps.add(new ValorExpresiones(parser.contador_val_expresiones, (String) operador_, "OP"));
+                                        parser.contador_val_expresiones++;
+
+                                        RESULT = (String) operador_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("TIPO_OPERACION",12, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1976,12 +2290,15 @@ class CUP$Parser$actions {
 		int asterico_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String asterico_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                // Nodo nuevoAsterisco = new Nodo(null, null, asterico_, parser.contador);
-                                // parser.contador++;
-                                // Resultado res = new Resultado(nuevoAsterisco, asterico_);
-                                // RESULT = res;
-                                RESULT = asterico_;
-                            
+                                    // ==============================================
+                                        // Nodo nuevoAsterisco = new Nodo(null, null, asterico_, parser.contador);
+                                        // parser.contador++;
+                                        // Resultado res = new Resultado(nuevoAsterisco, asterico_);
+                                        // RESULT = res;
+                                    // ==============================================
+
+                                        RESULT = asterico_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("OPERADOR",13, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1994,12 +2311,15 @@ class CUP$Parser$actions {
 		int punto_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String punto_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                // Nodo nuevoPunto = new Nodo(null, null, punto_, parser.contador);
-                                // parser.contador++;
-                                // Resultado res = new Resultado(nuevoPunto, punto_);
-                                // RESULT = res;
-                                RESULT = punto_;
-                            
+                                    // ==============================================
+                                        // Nodo nuevoPunto = new Nodo(null, null, punto_, parser.contador);
+                                        // parser.contador++;
+                                        // Resultado res = new Resultado(nuevoPunto, punto_);
+                                        // RESULT = res;
+                                    // ==============================================
+
+                                        RESULT = punto_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("OPERADOR",13, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2012,12 +2332,15 @@ class CUP$Parser$actions {
 		int mas_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String mas_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                // Nodo nuevoMas = new Nodo(null, null, mas_, parser.contador);
-                                // parser.contador++;
-                                // Resultado res = new Resultado(nuevoMas, mas_);
-                                // RESULT = res;
-                                RESULT = mas_;
-                            
+                                    // ==============================================
+                                        // Nodo nuevoMas = new Nodo(null, null, mas_, parser.contador);
+                                        // parser.contador++;
+                                        // Resultado res = new Resultado(nuevoMas, mas_);
+                                        // RESULT = res;
+                                    // ==============================================
+
+                                        RESULT = mas_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("OPERADOR",13, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2030,12 +2353,15 @@ class CUP$Parser$actions {
 		int interrogacion_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String interrogacion_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                // Nodo nuevoInterrogacion = new Nodo(null, null, interrogacion_, parser.contador);
-                                // parser.contador++;
-                                // Resultado res = new Resultado(nuevoInterrogacion, interrogacion_);
-                                // RESULT = res;
-                                RESULT = interrogacion_;
-                            
+                                    // ==============================================
+                                        // Nodo nuevoInterrogacion = new Nodo(null, null, interrogacion_, parser.contador);
+                                        // parser.contador++;
+                                        // Resultado res = new Resultado(nuevoInterrogacion, interrogacion_);
+                                        // RESULT = res;
+                                    // ==============================================
+
+                                        RESULT = interrogacion_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("OPERADOR",13, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2048,12 +2374,16 @@ class CUP$Parser$actions {
 		int orBooleana_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String orBooleana_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                // Nodo nuevoOrBooleana = new Nodo(null, null, orBooleana_, parser.contador);
-                                // parser.contador++;
-                                // Resultado res = new Resultado(nuevoOrBooleana, orBooleana_);
-                                // RESULT = res;
-                                RESULT = orBooleana_;
-                            
+                                    // ==============================================
+                                        // Nodo nuevoOrBooleana = new Nodo(null, null, orBooleana_, parser.contador);
+                                        // parser.contador++;
+                                        // Resultado res = new Resultado(nuevoOrBooleana, orBooleana_);
+                                        // RESULT = res;
+                                    
+                                    // ==============================================
+
+                                        RESULT = orBooleana_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("OPERADOR",13, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2087,13 +2417,13 @@ class CUP$Parser$actions {
 		int lista_lexemas_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		Object lista_lexemas_ = (Object)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
-                                // ********************     Obteniendo lexemas    ********************
-                                StringBuilder temp_lex = new StringBuilder();
-                                temp_lex.append(lista_lexemas_);
-                                System.out.println("\nLexema reconocido: " + temp_lex.toString() + "\n");
-                                Instancias.listaLexemas.add(new Lexema(Instancias.contador_lexemas, identificador_lexema, temp_lex.toString()));
-                                Instancias.contador_lexemas++;
-                            
+                                        // ********************     Obteniendo lexemas    ********************
+                                        StringBuilder temp_lex = new StringBuilder();
+                                        temp_lex.append(lista_lexemas_);
+                                        System.out.println("\nLexema reconocido: " + temp_lex.toString() + "\n");
+                                        Instancias.listaLexemas.add(new Lexema(Instancias.contador_lexemas, identificador_lexema, temp_lex.toString()));
+                                        Instancias.contador_lexemas++;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ESTRUCTURA_LEXEMA",19, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2106,8 +2436,8 @@ class CUP$Parser$actions {
 		int cadena_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String cadena_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = cadena_;
-                            
+                                        RESULT = cadena_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LISTA_LEXEMAS",20, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2120,8 +2450,8 @@ class CUP$Parser$actions {
 		int cadena_right = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		String cadena_ = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-                                RESULT = cadena_;
-                            
+                                        RESULT = cadena_;
+                                    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("LISTA_LEXEMAS",20, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;

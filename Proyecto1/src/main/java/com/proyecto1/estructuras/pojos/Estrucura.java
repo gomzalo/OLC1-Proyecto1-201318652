@@ -47,4 +47,11 @@ public class Estrucura {
         System.out.println("Id: " + this.id + ", identificador: " + this.nombre + 
         ",\t\t valor: " + this.valor);
     }
+    
+    public String mostrarStr(){
+        String content = "";
+        content = "Id: " + this.id + ", identificador: " + this.nombre + 
+        ",\t\t valor: " + this.valor;
+        return content;
+    }
 }

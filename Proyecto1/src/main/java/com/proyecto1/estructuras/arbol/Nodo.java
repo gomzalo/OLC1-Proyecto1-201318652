@@ -42,6 +42,8 @@ public class Nodo {
         });
     }
     
+//    public Nodo getNodo()
+    
     public String getCodigoInterno(){
         String etiqueta = "";
         if (izq == null && der == null) {
